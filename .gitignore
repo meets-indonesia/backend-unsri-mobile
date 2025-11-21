@@ -4,8 +4,6 @@
 *.dll
 *.so
 *.dylib
-bin/
-dist/
 
 # Test binary, built with `go test -c`
 *.test
@@ -19,6 +17,13 @@ vendor/
 # Go workspace file
 go.work
 
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
 # IDE
 .idea/
 .vscode/
@@ -30,21 +35,32 @@ go.work
 .DS_Store
 Thumbs.db
 
-# Environment variables
-.env
-.env.local
-.env.*.local
+# Build output
+bin/
+dist/
+build/
 
 # Logs
 *.log
 logs/
 
-# Database
+# Storage
+storage/
 *.db
 *.sqlite
-*.sqlite3
 
 # Temporary files
 tmp/
 temp/
 
+# Docker
+.dockerignore
+
+# Kubernetes
+*.kubeconfig
+
+# Secrets
+secrets/
+*.pem
+*.key
+*.crt

@@ -105,11 +105,16 @@ clean:
 	@echo "Clean complete!"
 
 # Database migrations
+# Note: Using port 5433 for host connection (Docker maps 5433:5432)
+# Services inside Docker use port 5432 via Docker network
 migrate-up:
-	@migrate -path migrations -database "postgres://unsri_user:unsri_pass@localhost:5432/unsri_db?sslmode=disable" up
+	@migrate -path migrations -database "postgres://unsri_user:unsri_pass@localhost:5433/unsri_db?sslmode=disable" up
 
 migrate-down:
-	@migrate -path migrations -database "postgres://unsri_user:unsri_pass@localhost:5432/unsri_db?sslmode=disable" down
+	@migrate -path migrations -database "postgres://unsri_user:unsri_pass@localhost:5433/unsri_db?sslmode=disable" down
+
+migrate-version:
+	@migrate -path migrations -database "postgres://unsri_user:unsri_pass@localhost:5433/unsri_db?sslmode=disable" version
 
 # Docker commands
 docker-build:

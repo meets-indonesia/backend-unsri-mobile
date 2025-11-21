@@ -5,12 +5,25 @@ Panduan lengkap untuk deployment backend UNSRI ke berbagai environment.
 ## 📋 Table of Contents
 
 1. [Prerequisites](#prerequisites)
-2. [Environment Setup](#environment-setup)
-3. [Docker Deployment](#docker-deployment)
-4. [Kubernetes Deployment](#kubernetes-deployment)
-5. [Production Checklist](#production-checklist)
-6. [Monitoring & Logging](#monitoring--logging)
-7. [Troubleshooting](#troubleshooting)
+2. [Deployment Strategy](#deployment-strategy) ⭐ **Baca ini dulu!**
+3. [Environment Setup](#environment-setup)
+4. [Docker Deployment](#docker-deployment) ⭐ **Recommended untuk MVP**
+5. [Kubernetes Deployment](#kubernetes-deployment) ⭐ **Untuk scale besar**
+6. [Production Checklist](#production-checklist)
+7. [Monitoring & Logging](#monitoring--logging)
+8. [Troubleshooting](#troubleshooting)
+
+## 🎯 Deployment Strategy
+
+**Pertanyaan: Perlu Kubernetes cluster untuk production?**
+
+**Jawaban singkat:** Untuk MVP, **TIDAK perlu**. Gunakan Docker Compose dulu.
+
+**Rekomendasi:**
+- ✅ **MVP/Initial Launch**: Docker Compose + Reverse Proxy (Nginx/Caddy)
+- ✅ **Scale Besar**: Kubernetes (ketika traffic > 5,000 users atau butuh HA)
+
+Lihat [Production Deployment Strategy](./PRODUCTION_DEPLOYMENT_STRATEGY.md) untuk analisis lengkap.
 
 ## Prerequisites
 

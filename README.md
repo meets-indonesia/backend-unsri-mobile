@@ -293,7 +293,19 @@ make lint
 
 ## 🐳 Deployment
 
-### Docker Deployment
+### 🎯 Deployment Strategy
+
+**Untuk MVP/Production awal: Gunakan Docker Compose** ✅
+
+**Kapan perlu Kubernetes?**
+- Traffic > 5,000 concurrent users
+- Butuh high availability (99.9%+ uptime)
+- Butuh auto-scaling
+- Multi-region deployment
+
+Lihat [Production Deployment Strategy](./docs/PRODUCTION_DEPLOYMENT_STRATEGY.md) untuk analisis lengkap.
+
+### Docker Deployment (Recommended untuk MVP)
 
 ```bash
 # Build images
@@ -306,8 +318,26 @@ docker-compose -f deployments/docker-compose/docker-compose.yml up -d
 docker-compose -f deployments/docker-compose/docker-compose.yml logs -f
 ```
 
-### Kubernetes Deployment
+**Setup dengan Reverse Proxy (Nginx/Caddy):**
+```bash
+# Setup Nginx atau Caddy untuk HTTPS dan domain
+# Lihat docs/DEPLOYMENT.md untuk detail
+```
 
+### Kubernetes Deployment (Untuk Scale Besar)
+
+**Install Kubernetes & kubectl:**
+```bash
+# Quick install
+chmod +x scripts/install-kubernetes.sh
+./scripts/install-kubernetes.sh
+
+# Or install Minikube for local cluster
+chmod +x scripts/install-minikube.sh
+./scripts/install-minikube.sh
+```
+
+**Deploy Services:**
 ```bash
 # Create namespace
 kubectl create namespace unsri-backend
@@ -319,7 +349,7 @@ kubectl apply -f deployments/kubernetes/
 kubectl get pods -n unsri-backend
 ```
 
-Lihat [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) untuk panduan deployment lengkap.
+Lihat [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) dan [docs/KUBERNETES_INSTALLATION.md](./docs/KUBERNETES_INSTALLATION.md) untuk panduan lengkap.
 
 ## 🧪 Testing
 

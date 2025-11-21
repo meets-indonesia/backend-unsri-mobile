@@ -1,4 +1,4 @@
-version: '3.8'
+# version: '3.8'  # Removed - version is obsolete in Docker Compose v2
 
 services:
   postgres:
@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: unsri_user
       POSTGRES_PASSWORD: unsri_pass
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ../../migrations:/docker-entrypoint-initdb.d
