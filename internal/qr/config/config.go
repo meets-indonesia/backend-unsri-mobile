@@ -1,0 +1,84 @@
+package config
+
+import (
+	"time"
+
+	"github.com/spf13/viper"
+)
+
+// Config holds the configuration for QR service
+type Config struct {
+	Port            string
+	Database        DatabaseConfig
+	Redis           RedisConfig
+	JWT             JWTConfig
+	LogLevel        string
+}
+
+// DatabaseConfig holds database configuration
+type DatabaseConfig struct {
+	Host            string
+	Port            string
+	User            string
+	Password        string
+	DBName          string
+	SSLMode         string
+	MaxOpenConns    int
+	MaxIdleConns    int
+	ConnMaxLifetime time.Duration
+}
+
+// RedisConfig holds Redis configuration
+type RedisConfig struct {
+	Host     string
+	Port     string
+	Password string
+	DB       int
+}
+
+// JWTConfig holds JWT configuration
+type JWTConfig struct {
+	SecretKey string
+}
+
+// Load loads configuration from environment variables
+func Load() *Config {
+	viper.SetDefault("PORT", "8085")
+	viper.SetDefault("LOG_LEVEL", "info")
+	viper.SetDefault("DATABASE_HOST", "localhost")
+	viper.SetDefault("DATABASE_PORT", "5432")
+	viper.SetDefault("DATABASE_USER", "unsri_user")
+	viper.SetDefault("DATABASE_PASSWORD", "unsri_pass")
+	viper.SetDefault("DATABASE_NAME", "unsri_db")
+	viper.SetDefault("DATABASE_SSLMODE", "disable")
+	viper.SetDefault("REDIS_HOST", "localhost")
+	viper.SetDefault("REDIS_PORT", "6379")
+	viper.SetDefault("JWT_SECRET", "your-secret-key-change-in-production")
+
+	viper.AutomaticEnv()
+
+	return &Config{
+		Port:     viper.GetString("PORT"),
+		LogLevel: viper.GetString("LOG_LEVEL"),
+		Database: DatabaseConfig{
+			Host:            viper.GetString("DATABASE_HOST"),
+			Port:            viper.GetString("DATABASE_PORT"),
+			User:            viper.GetString("DATABASE_USER"),
+			Password:        viper.GetString("DATABASE_PASSWORD"),
+			DBName:          viper.GetString("DATABASE_NAME"),
+			SSLMode:         viper.GetString("DATABASE_SSLMODE"),
+			MaxOpenConns:    25,
+			MaxIdleConns:    5,
+			ConnMaxLifetime: 5 * time.Minute,
+		},
+		Redis: RedisConfig{
+			Host:     viper.GetString("REDIS_HOST"),
+			Port:     viper.GetString("REDIS_PORT"),
+			Password: viper.GetString("REDIS_PASSWORD"),
+			DB:       0,
+		},
+		JWT: JWTConfig{
+			SecretKey: viper.GetString("JWT_SECRET"),
+		},
+	}
+}

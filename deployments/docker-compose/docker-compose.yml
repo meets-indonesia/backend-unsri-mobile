@@ -1,0 +1,498 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: unsri-postgres
+    environment:
+      POSTGRES_DB: unsri_db
+      POSTGRES_USER: unsri_user
+      POSTGRES_PASSWORD: unsri_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../../migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U unsri_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - unsri-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: unsri-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - unsri-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: unsri-rabbitmq
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: unsri_user
+      RABBITMQ_DEFAULT_PASS: unsri_pass
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - unsri-network
+
+  auth-service:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.auth-service
+    container_name: unsri-auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      - PORT=8081
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=your-secret-key-change-in-production
+      - JWT_ACCESS_TTL=15m
+      - JWT_REFRESH_TTL=7d
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  user-service:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.user-service
+    container_name: unsri-user-service
+    ports:
+      - "8082:8082"
+    environment:
+      - PORT=8082
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  attendance-service:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.attendance-service
+    container_name: unsri-attendance-service
+    ports:
+      - "8084:8084"
+    environment:
+      - PORT=8084
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  course-service:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.course-service
+    container_name: unsri-course-service
+    ports:
+      - "8089:8089"
+    environment:
+      - PORT=8089
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  broadcast-service:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.broadcast-service
+    container_name: unsri-broadcast-service
+    ports:
+      - "8086:8086"
+    environment:
+      - PORT=8086
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.notification-service
+    container_name: unsri-notification-service
+    ports:
+      - "8087:8087"
+    environment:
+      - PORT=8087
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  schedule-service:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.schedule-service
+    container_name: unsri-schedule-service
+    ports:
+      - "8083:8083"
+    environment:
+      - PORT=8083
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  qr-service:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.qr-service
+    container_name: unsri-qr-service
+    ports:
+      - "8085:8085"
+    environment:
+      - PORT=8085
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  calendar-service:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.calendar-service
+    container_name: unsri-calendar-service
+    ports:
+      - "8088:8088"
+    environment:
+      - PORT=8088
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  location-service:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.location-service
+    container_name: unsri-location-service
+    ports:
+      - "8090:8090"
+    environment:
+      - PORT=8090
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  access-service:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.access-service
+    container_name: unsri-access-service
+    ports:
+      - "8091:8091"
+    environment:
+      - PORT=8091
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  quick-actions-service:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.quick-actions-service
+    container_name: unsri-quick-actions-service
+    ports:
+      - "8092:8092"
+    environment:
+      - PORT=8092
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  file-storage-service:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.file-storage-service
+    container_name: unsri-file-storage-service
+    ports:
+      - "8093:8093"
+    environment:
+      - PORT=8093
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - STORAGE_TYPE=local
+      - STORAGE_BASE_PATH=/storage
+      - STORAGE_BASE_URL=http://localhost:8093/files
+      - STORAGE_MAX_SIZE=10485760
+      - JWT_SECRET=your-secret-key-change-in-production
+    volumes:
+      - file_storage:/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  search-service:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.search-service
+    container_name: unsri-search-service
+    ports:
+      - "8094:8094"
+    environment:
+      - PORT=8094
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  report-service:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.report-service
+    container_name: unsri-report-service
+    ports:
+      - "8095:8095"
+    environment:
+      - PORT=8095
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  api-gateway:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.api-gateway
+    container_name: unsri-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - LOG_LEVEL=info
+      - ENABLE_SWAGGER=${ENABLE_SWAGGER:-false}
+      - AUTH_SERVICE_URL=http://auth-service:8081
+      - USER_SERVICE_URL=http://user-service:8082
+      - ATTENDANCE_SERVICE_URL=http://attendance-service:8084
+      - SCHEDULE_SERVICE_URL=http://schedule-service:8083
+      - QR_SERVICE_URL=http://qr-service:8085
+      - COURSE_SERVICE_URL=http://course-service:8089
+      - BROADCAST_SERVICE_URL=http://broadcast-service:8086
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8087
+      - CALENDAR_SERVICE_URL=http://calendar-service:8088
+      - LOCATION_SERVICE_URL=http://location-service:8090
+      - ACCESS_SERVICE_URL=http://access-service:8091
+      - QUICK_ACTIONS_SERVICE_URL=http://quick-actions-service:8092
+      - FILE_SERVICE_URL=http://file-storage-service:8093
+      - SEARCH_SERVICE_URL=http://search-service:8094
+      - REPORT_SERVICE_URL=http://report-service:8095
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      - auth-service
+      - user-service
+      - attendance-service
+      - schedule-service
+      - qr-service
+      - course-service
+      - broadcast-service
+      - notification-service
+      - calendar-service
+      - location-service
+      - access-service
+      - quick-actions-service
+      - file-storage-service
+      - search-service
+      - report-service
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+  file_storage:
+
+networks:
+  unsri-network:
+    driver: bridge
+
