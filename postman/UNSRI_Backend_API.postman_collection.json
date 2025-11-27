@@ -1,418 +1,1814 @@
 {
-	"info": {
-		"_postman_id": "unsri-backend-api",
-		"name": "UNSRI Backend API",
-		"description": "Complete API collection for UNSRI Backend Services",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "unsri-backend"
-	},
-	"item": [
-		{
-			"name": "Authentication",
-			"item": [
-				{
-					"name": "Register",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"student@unsri.ac.id\",\n  \"password\": \"password123\",\n  \"role\": \"mahasiswa\",\n  \"name\": \"John Doe\",\n  \"nim\": \"1234567890\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/auth/register",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "auth", "register"]
-						}
-					}
-				},
-				{
-					"name": "Login",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"student@unsri.ac.id\",\n  \"password\": \"password123\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/auth/login",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "auth", "login"]
-						}
-				}
-			}
-		},
-		{
-			"name": "Users",
-			"item": [
-				{
-					"name": "Get Profile",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/v1/users/profile",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "users", "profile"]
-						}
-					}
-				},
-				{
-					"name": "Update Profile",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"John Doe Updated\",\n  \"phone\": \"081234567890\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/users/profile",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "users", "profile"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "Attendance",
-			"item": [
-				{
-					"name": "Scan QR Code",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"qr_code\": \"<qr_code_data>\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/attendance/scan",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "attendance", "scan"]
-						}
-					}
-				},
-				{
-					"name": "Get Attendance History",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/v1/attendance/history?page=1&per_page=20",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "attendance", "history"],
-							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "per_page",
-									"value": "20"
-								}
-							]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "QR Code",
-			"item": [
-				{
-					"name": "Generate Class QR",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"schedule_id\": \"<schedule_id>\",\n  \"duration\": 15\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/qr/class/generate",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "qr", "class", "generate"]
-						}
-					}
-				},
-				{
-					"name": "Generate Access QR",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"duration\": 525600\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/qr/access/generate",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "qr", "access", "generate"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "Location",
-			"item": [
-				{
-					"name": "Tap In",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"latitude\": -2.9914,\n  \"longitude\": 104.7565\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/location/tap-in",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "location", "tap-in"]
-						}
-					}
-				},
-				{
-					"name": "Tap Out",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"latitude\": -2.9914,\n  \"longitude\": 104.7565\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/location/tap-out",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "location", "tap-out"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "Search",
-			"item": [
-				{
-					"name": "Search Users",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/v1/search?q=john&type=users&page=1&per_page=20",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "search"],
-							"query": [
-								{
-									"key": "q",
-									"value": "john"
-								},
-								{
-									"key": "type",
-									"value": "users"
-								},
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "per_page",
-									"value": "20"
-								}
-							]
-						}
-					}
-				},
-				{
-					"name": "Global Search",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/v1/search/global?q=algorithm&types=users,courses&limit=10",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "search", "global"],
-							"query": [
-								{
-									"key": "q",
-									"value": "algorithm"
-								},
-								{
-									"key": "types",
-									"value": "users,courses"
-								},
-								{
-									"key": "limit",
-									"value": "10"
-								}
-							]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "Reports",
-			"item": [
-				{
-					"name": "Attendance Report",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/v1/reports/attendance?start_date=2024-01-01&end_date=2024-01-31&summary=true",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "reports", "attendance"],
-							"query": [
-								{
-									"key": "start_date",
-									"value": "2024-01-01"
-								},
-								{
-									"key": "end_date",
-									"value": "2024-01-31"
-								},
-								{
-									"key": "summary",
-									"value": "true"
-								}
-							]
-						}
-					}
-				},
-				{
-					"name": "Academic Report",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/v1/reports/academic?student_id=<student_id>&semester=2024-1",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "reports", "academic"],
-							"query": [
-								{
-									"key": "student_id",
-									"value": "<student_id>"
-								},
-								{
-									"key": "semester",
-									"value": "2024-1"
-								}
-							]
-						}
-					}
-				}
-			]
-		}
-	],
-	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost:8080",
-			"type": "string"
-		},
-		{
-			"key": "access_token",
-			"value": "",
-			"type": "string"
-		}
-	]
+  "info": {
+    "_postman_id": "unsri-backend-api",
+    "name": "UNSRI Backend API",
+    "description": "Complete API collection for UNSRI Backend Services - Updated 2025-11-27",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "unsri-backend"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@unsri.ac.id\",\n  \"password\": \"password123\",\n  \"role\": \"mahasiswa\",\n  \"name\": \"John Doe\",\n  \"nim\": \"1234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@unsri.ac.id\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe Updated\",\n  \"phone\": \"081234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "profile"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Master Data",
+      "item": [
+        {
+          "name": "Study Programs",
+          "item": [
+            {
+              "name": "Get Study Programs",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/study-programs?page=1&per_page=20&faculty=&is_active=true",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "study-programs"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "20"
+                    },
+                    {
+                      "key": "faculty",
+                      "value": ""
+                    },
+                    {
+                      "key": "is_active",
+                      "value": "true"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Study Program by ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/study-programs/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "study-programs", ":id"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "<study_program_id>"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Study Program",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"IF\",\n  \"name\": \"Informatika\",\n  \"name_en\": \"Informatics\",\n  \"faculty\": \"Fakultas Ilmu Komputer\",\n  \"degree_level\": \"S1\",\n  \"accreditation\": \"A\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/study-programs",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "study-programs"]
+                }
+              }
+            },
+            {
+              "name": "Update Study Program",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Informatika Updated\",\n  \"faculty\": \"Fakultas Ilmu Komputer\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/study-programs/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "study-programs", ":id"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "<study_program_id>"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Study Program",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/study-programs/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "study-programs", ":id"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "<study_program_id>"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Academic Periods",
+          "item": [
+            {
+              "name": "Get Academic Periods",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/academic-periods?page=1&per_page=20",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "academic-periods"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "20"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Active Academic Period",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/academic-periods/active",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "academic-periods", "active"]
+                }
+              }
+            },
+            {
+              "name": "Get Academic Period by ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/academic-periods/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "academic-periods", ":id"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "<academic_period_id>"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Academic Period",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"2024-1\",\n  \"name\": \"Semester Ganjil 2024/2025\",\n  \"academic_year\": \"2024/2025\",\n  \"semester_type\": \"GANJIL\",\n  \"start_date\": \"2024-09-01\",\n  \"end_date\": \"2025-01-31\",\n  \"registration_start\": \"2024-08-01\",\n  \"registration_end\": \"2024-08-31\",\n  \"is_active\": false\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/academic-periods",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "academic-periods"]
+                }
+              }
+            },
+            {
+              "name": "Update Academic Period",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Semester Ganjil 2024/2025 Updated\",\n  \"is_active\": true\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/academic-periods/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "academic-periods", ":id"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "<academic_period_id>"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Academic Period",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/academic-periods/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "academic-periods", ":id"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "<academic_period_id>"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rooms",
+          "item": [
+            {
+              "name": "Get Rooms",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/rooms?page=1&per_page=20",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "rooms"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "20"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Room by ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/rooms/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "rooms", ":id"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "<room_id>"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Room",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"A101\",\n  \"name\": \"Ruang Kelas A101\",\n  \"building\": \"Gedung A\",\n  \"floor\": 1,\n  \"capacity\": 40,\n  \"room_type\": \"classroom\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/rooms",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "rooms"]
+                }
+              }
+            },
+            {
+              "name": "Update Room",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Ruang Kelas A101 Updated\",\n  \"capacity\": 50\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/rooms/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "rooms", ":id"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "<room_id>"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Room",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/rooms/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "rooms", ":id"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "<room_id>"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Courses",
+      "item": [
+        {
+          "name": "Get Courses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses?page=1&per_page=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "courses"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Course by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "courses", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<course_id>"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"IF101\",\n  \"name\": \"Algoritma dan Struktur Data\",\n  \"credits\": 3\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "courses"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Enrollments",
+      "item": [
+        {
+          "name": "Get Enrollments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/enrollments?page=1&per_page=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "enrollments"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Enrollment by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/enrollments/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "enrollments", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<enrollment_id>"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Enrollment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"class_id\": \"<class_id>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/enrollments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "enrollments"]
+            }
+          }
+        },
+        {
+          "name": "Update Enrollment Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/enrollments/:id/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "enrollments", ":id", "status"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<enrollment_id>"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Enrollment Grade",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"grade\": \"A\",\n  \"score\": 85.5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/enrollments/:id/grade",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "enrollments", ":id", "grade"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<enrollment_id>"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Enrollments by Class",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/classes/:id/enrollments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "classes", ":id", "enrollments"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<class_id>"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Attendance",
+      "item": [
+        {
+          "name": "Scan QR Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"qr_code\": \"<qr_code_data>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/attendance/scan",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "attendance", "scan"]
+            }
+          }
+        },
+        {
+          "name": "Get Attendance History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/attendance/history?page=1&per_page=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "attendance", "history"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Work Attendance (HRIS)",
+      "item": [
+        {
+          "name": "Check In",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": -2.9914,\n  \"longitude\": 104.7565,\n  \"is_via_wifi\": true,\n  \"notes\": \"Check in from office\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/work-attendance/check-in",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "work-attendance", "check-in"]
+            }
+          }
+        },
+        {
+          "name": "Check Out",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": -2.9914,\n  \"longitude\": 104.7565,\n  \"is_via_wifi\": true,\n  \"notes\": \"Check out from office\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/work-attendance/check-out",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "work-attendance", "check-out"]
+            }
+          }
+        },
+        {
+          "name": "Get Work Attendance Records",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/work-attendance/records?page=1&per_page=20&user_id=&start_date=&end_date=",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "work-attendance", "records"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                },
+                {
+                  "key": "user_id",
+                  "value": ""
+                },
+                {
+                  "key": "start_date",
+                  "value": ""
+                },
+                {
+                  "key": "end_date",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Shift Patterns",
+          "item": [
+            {
+              "name": "Get Shift Patterns",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/work-attendance/shifts?page=1&per_page=20",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "work-attendance", "shifts"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "20"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Shift Pattern by ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/work-attendance/shifts/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "work-attendance", "shifts", ":id"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "<shift_id>"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Shift Pattern",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Shift Pagi\",\n  \"start_time\": \"08:00:00\",\n  \"end_time\": \"17:00:00\",\n  \"break_duration\": 60\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/work-attendance/shifts",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "work-attendance", "shifts"]
+                }
+              }
+            },
+            {
+              "name": "Update Shift Pattern",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Shift Pagi Updated\",\n  \"start_time\": \"08:30:00\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/work-attendance/shifts/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "work-attendance", "shifts", ":id"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "<shift_id>"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Shift Pattern",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/work-attendance/shifts/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "work-attendance", "shifts", ":id"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "<shift_id>"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "User Shifts",
+          "item": [
+            {
+              "name": "Get User Shifts",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/work-attendance/user-shifts/:userId?date=",
+                  "host": ["{{base_url}}"],
+                  "path": [
+                    "api",
+                    "v1",
+                    "work-attendance",
+                    "user-shifts",
+                    ":userId"
+                  ],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": ""
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "userId",
+                      "value": "<user_id>"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create User Shift",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"user_id\": \"<user_id>\",\n  \"shift_id\": \"<shift_id>\",\n  \"effective_from\": \"2024-01-01\",\n  \"effective_to\": \"2024-12-31\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/work-attendance/user-shifts",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "work-attendance", "user-shifts"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Work Schedules",
+          "item": [
+            {
+              "name": "Get Work Schedules",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/work-attendance/schedules?page=1&per_page=20&user_id=&start_date=&end_date=",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "work-attendance", "schedules"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "20"
+                    },
+                    {
+                      "key": "user_id",
+                      "value": ""
+                    },
+                    {
+                      "key": "start_date",
+                      "value": ""
+                    },
+                    {
+                      "key": "end_date",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Work Schedule",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"user_id\": \"<user_id>\",\n  \"schedule_date\": \"2024-01-15\",\n  \"shift_id\": \"<shift_id>\",\n  \"start_time\": \"08:00:00\",\n  \"end_time\": \"17:00:00\",\n  \"work_type\": \"REGULAR\",\n  \"location\": \"Office\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/work-attendance/schedules",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "work-attendance", "schedules"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Leave Management (HRIS)",
+      "item": [
+        {
+          "name": "Leave Requests",
+          "item": [
+            {
+              "name": "Get Leave Requests",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/leave-requests?page=1&per_page=20&user_id=&status=&leave_type=",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "leave-requests"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "20"
+                    },
+                    {
+                      "key": "user_id",
+                      "value": ""
+                    },
+                    {
+                      "key": "status",
+                      "value": ""
+                    },
+                    {
+                      "key": "leave_type",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Leave Request by ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/leave-requests/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "leave-requests", ":id"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "<leave_request_id>"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Leave Request",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"leave_type\": \"ANNUAL_LEAVE\",\n  \"start_date\": \"2024-12-20\",\n  \"end_date\": \"2024-12-25\",\n  \"reason\": \"Annual leave for holiday\",\n  \"attachment_url\": \"https://example.com/attachment.pdf\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/leave-requests",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "leave-requests"]
+                }
+              }
+            },
+            {
+              "name": "Approve Leave Request",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/leave-requests/:id/approve",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "leave-requests", ":id", "approve"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "<leave_request_id>"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Reject Leave Request",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rejection_reason\": \"Insufficient quota\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/leave-requests/:id/reject",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "leave-requests", ":id", "reject"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "<leave_request_id>"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Cancel Leave Request",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/leave-requests/:id/cancel",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "leave-requests", ":id", "cancel"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "<leave_request_id>"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Leave Requests by User",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/leave-requests/by-user/:userId",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "leave-requests", "by-user", ":userId"],
+                  "variable": [
+                    {
+                      "key": "userId",
+                      "value": "<user_id>"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Leave Quotas",
+          "item": [
+            {
+              "name": "Get Leave Quotas",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/leave-quotas?page=1&per_page=20&user_id=&leave_type=&year=",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "leave-quotas"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "20"
+                    },
+                    {
+                      "key": "user_id",
+                      "value": ""
+                    },
+                    {
+                      "key": "leave_type",
+                      "value": ""
+                    },
+                    {
+                      "key": "year",
+                      "value": ""
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Leave Quota by ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/leave-quotas/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "leave-quotas", ":id"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "<leave_quota_id>"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Leave Quota",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"user_id\": \"<user_id>\",\n  \"leave_type\": \"ANNUAL_LEAVE\",\n  \"year\": 2024,\n  \"total_quota\": 12\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/leave-quotas",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "leave-quotas"]
+                }
+              }
+            },
+            {
+              "name": "Update Leave Quota",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"total_quota\": 15\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/leave-quotas/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "leave-quotas", ":id"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "<leave_quota_id>"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Leave Quotas by User",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/leave-quotas/by-user/:userId?year=",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "leave-quotas", "by-user", ":userId"],
+                  "query": [
+                    {
+                      "key": "year",
+                      "value": ""
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "userId",
+                      "value": "<user_id>"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "QR Code",
+      "item": [
+        {
+          "name": "Generate Class QR",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"schedule_id\": \"<schedule_id>\",\n  \"duration\": 15\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/qr/class/generate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "qr", "class", "generate"]
+            }
+          }
+        },
+        {
+          "name": "Generate Access QR",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"duration\": 525600\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/qr/access/generate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "qr", "access", "generate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Location",
+      "item": [
+        {
+          "name": "Tap In",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": -2.9914,\n  \"longitude\": 104.7565\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/location/tap-in",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "location", "tap-in"]
+            }
+          }
+        },
+        {
+          "name": "Tap Out",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": -2.9914,\n  \"longitude\": 104.7565\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/location/tap-out",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "location", "tap-out"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "item": [
+        {
+          "name": "Search Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/search?q=john&type=users&page=1&per_page=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "john"
+                },
+                {
+                  "key": "type",
+                  "value": "users"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Global Search",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/search/global?q=algorithm&types=users,courses&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "search", "global"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "algorithm"
+                },
+                {
+                  "key": "types",
+                  "value": "users,courses"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Attendance Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reports/attendance?start_date=2024-01-01&end_date=2024-01-31&summary=true",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "reports", "attendance"],
+              "query": [
+                {
+                  "key": "start_date",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "end_date",
+                  "value": "2024-01-31"
+                },
+                {
+                  "key": "summary",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Academic Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reports/academic?student_id=<student_id>&semester=2024-1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "reports", "academic"],
+              "query": [
+                {
+                  "key": "student_id",
+                  "value": "<student_id>"
+                },
+                {
+                  "key": "semester",
+                  "value": "2024-1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    }
+  ]
 }
-
