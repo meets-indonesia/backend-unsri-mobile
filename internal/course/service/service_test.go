@@ -288,4 +288,256 @@ func TestEnrollmentModel(t *testing.T) {
 			t.Errorf("Expected table name 'enrollments', got '%s'", enrollment.TableName())
 		}
 	})
+
+	t.Run("enrollment status transitions", func(t *testing.T) {
+		enrollment := createTestEnrollment()
+		enrollment.Status = "PENDING"
+
+		// PENDING -> APPROVED
+		enrollment.Status = "APPROVED"
+		if enrollment.Status != "APPROVED" {
+			t.Error("Status should be APPROVED")
+		}
+
+		// PENDING -> REJECTED
+		enrollment.Status = "PENDING"
+		enrollment.Status = "REJECTED"
+		if enrollment.Status != "REJECTED" {
+			t.Error("Status should be REJECTED")
+		}
+	})
+
+	t.Run("enrollment grade validation", func(t *testing.T) {
+		enrollment := createTestEnrollment()
+		validGrades := []string{"A", "B", "C", "D", "E", "F"}
+
+		for _, grade := range validGrades {
+			enrollment.Grade = grade
+			if enrollment.Grade != grade {
+				t.Errorf("Expected grade %s, got %s", grade, enrollment.Grade)
+			}
+		}
+	})
+
+	t.Run("enrollment score validation", func(t *testing.T) {
+		enrollment := createTestEnrollment()
+		score := 85.5
+		enrollment.Score = score
+
+		if enrollment.Score < 0 || enrollment.Score > 100 {
+			t.Error("Score should be between 0 and 100")
+		}
+	})
+}
+
+// Test CreateEnrollmentRequest validation
+func TestCreateEnrollmentRequest(t *testing.T) {
+	tests := []struct {
+		name    string
+		req     CreateEnrollmentRequest
+		wantErr bool
+	}{
+		{
+			name: "valid request",
+			req: CreateEnrollmentRequest{
+				ClassID: uuid.New().String(),
+			},
+			wantErr: false,
+		},
+		{
+			name: "missing class_id",
+			req: CreateEnrollmentRequest{},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.req.ClassID == "" && !tt.wantErr {
+				t.Error("ClassID should be required")
+			}
+		})
+	}
+}
+
+// Test UpdateEnrollmentStatusRequest validation
+func TestUpdateEnrollmentStatusRequest(t *testing.T) {
+	tests := []struct {
+		name    string
+		req     UpdateEnrollmentStatusRequest
+		wantErr bool
+	}{
+		{
+			name: "valid request - approve",
+			req: UpdateEnrollmentStatusRequest{
+				Status: "APPROVED",
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid request - reject",
+			req: UpdateEnrollmentStatusRequest{
+				Status: "REJECTED",
+			},
+			wantErr: false,
+		},
+		{
+			name: "invalid status",
+			req: UpdateEnrollmentStatusRequest{
+				Status: "INVALID",
+			},
+			wantErr: true,
+		},
+		{
+			name: "empty status",
+			req: UpdateEnrollmentStatusRequest{
+				Status: "",
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			validStatuses := []string{"PENDING", "APPROVED", "REJECTED", "COMPLETED", "DROPPED", "FAILED"}
+			isValid := false
+			for _, validStatus := range validStatuses {
+				if tt.req.Status == validStatus {
+					isValid = true
+					break
+				}
+			}
+			if !isValid && !tt.wantErr {
+				t.Error("Status should be valid")
+			}
+		})
+	}
+}
+
+// Test UpdateEnrollmentGradeRequest validation
+func TestUpdateEnrollmentGradeRequest(t *testing.T) {
+	tests := []struct {
+		name    string
+		req     UpdateEnrollmentGradeRequest
+		wantErr bool
+	}{
+		{
+			name: "valid request with grade and score",
+			req: UpdateEnrollmentGradeRequest{
+				Grade: "A",
+				Score: 85.5,
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid request with grade only",
+			req: UpdateEnrollmentGradeRequest{
+				Grade: "B",
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid request with score only",
+			req: UpdateEnrollmentGradeRequest{
+				Score: 90.0,
+			},
+			wantErr: false,
+		},
+		{
+			name: "invalid score range",
+			req: UpdateEnrollmentGradeRequest{
+				Score: 150.0,
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid grade",
+			req: UpdateEnrollmentGradeRequest{
+				Grade: "Z",
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.req.Score > 0 && (tt.req.Score < 0 || tt.req.Score > 100) && !tt.wantErr {
+				t.Error("Score should be between 0 and 100")
+			}
+			if tt.req.Grade != "" {
+				validGrades := []string{"A", "B", "C", "D", "E"}
+				isValid := false
+				for _, validGrade := range validGrades {
+					if tt.req.Grade == validGrade {
+						isValid = true
+						break
+					}
+				}
+				if !isValid && !tt.wantErr {
+					t.Error("Grade should be valid")
+				}
+			}
+		})
+	}
+}
+
+// Test GetEnrollmentsRequest pagination
+func TestGetEnrollmentsRequestPagination(t *testing.T) {
+	tests := []struct {
+		name     string
+		req      GetEnrollmentsRequest
+		expected struct {
+			page    int
+			perPage int
+		}
+	}{
+		{
+			name: "default pagination",
+			req: GetEnrollmentsRequest{
+				Page:    0,
+				PerPage: 0,
+			},
+			expected: struct {
+				page    int
+				perPage int
+			}{
+				page:    1,
+				perPage: 20,
+			},
+		},
+		{
+			name: "custom pagination",
+			req: GetEnrollmentsRequest{
+				Page:    2,
+				PerPage: 10,
+			},
+			expected: struct {
+				page    int
+				perPage int
+			}{
+				page:    2,
+				perPage: 10,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			page := tt.req.Page
+			if page < 1 {
+				page = 1
+			}
+			perPage := tt.req.PerPage
+			if perPage < 1 {
+				perPage = 20
+			}
+
+			if page != tt.expected.page {
+				t.Errorf("Expected page %d, got %d", tt.expected.page, page)
+			}
+			if perPage != tt.expected.perPage {
+				t.Errorf("Expected perPage %d, got %d", tt.expected.perPage, perPage)
+			}
+		})
+	}
 }

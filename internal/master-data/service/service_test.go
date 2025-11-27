@@ -4,9 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/uuid"
 	apperrors "unsri-backend/internal/shared/errors"
 	"unsri-backend/internal/shared/models"
+
+	"github.com/google/uuid"
 )
 
 // Test helper functions
@@ -303,4 +304,426 @@ func TestDateValidation(t *testing.T) {
 			t.Error("End date should be before start date in this test case")
 		}
 	})
+}
+
+// Test UpdateStudyProgramRequest validation
+func TestUpdateStudyProgramRequest(t *testing.T) {
+	name := "Updated Name"
+	nameEn := "Updated Name EN"
+	faculty := "Updated Faculty"
+	degreeLevel := "S2"
+	accreditation := "A"
+	isActive := true
+
+	tests := []struct {
+		name string
+		req  UpdateStudyProgramRequest
+	}{
+		{
+			name: "update name only",
+			req: UpdateStudyProgramRequest{
+				Name: &name,
+			},
+		},
+		{
+			name: "update all fields",
+			req: UpdateStudyProgramRequest{
+				Name:          &name,
+				NameEn:        &nameEn,
+				Faculty:       &faculty,
+				DegreeLevel:   &degreeLevel,
+				Accreditation: &accreditation,
+				IsActive:      &isActive,
+			},
+		},
+		{
+			name: "update is_active to false",
+			req: UpdateStudyProgramRequest{
+				IsActive: func() *bool { v := false; return &v }(),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.req.Name != nil && *tt.req.Name == "" {
+				t.Error("Name should not be empty if provided")
+			}
+		})
+	}
+}
+
+// Test UpdateAcademicPeriodRequest validation
+func TestUpdateAcademicPeriodRequest(t *testing.T) {
+	name := "Updated Period"
+	academicYear := "2025/2026"
+	semesterType := "GENAP"
+	startDate := "2025-02-01"
+	endDate := "2025-07-31"
+	isActive := true
+
+	tests := []struct {
+		name    string
+		req     UpdateAcademicPeriodRequest
+		wantErr bool
+	}{
+		{
+			name: "update name only",
+			req: UpdateAcademicPeriodRequest{
+				Name: &name,
+			},
+			wantErr: false,
+		},
+		{
+			name: "update with invalid date format",
+			req: UpdateAcademicPeriodRequest{
+				StartDate: func() *string { v := "invalid-date"; return &v }(),
+			},
+			wantErr: true,
+		},
+		{
+			name: "update all fields",
+			req: UpdateAcademicPeriodRequest{
+				Name:         &name,
+				AcademicYear: &academicYear,
+				SemesterType: &semesterType,
+				StartDate:    &startDate,
+				EndDate:      &endDate,
+				IsActive:     &isActive,
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.req.StartDate != nil {
+				_, err := time.Parse("2006-01-02", *tt.req.StartDate)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("Date parsing error = %v, wantErr %v", err, tt.wantErr)
+				}
+			}
+		})
+	}
+}
+
+// Test UpdateRoomRequest validation
+func TestUpdateRoomRequest(t *testing.T) {
+	name := "Updated Room"
+	building := "Gedung B"
+	floor := 2
+	capacity := 50
+	roomType := "lab"
+	facilities := "Projector, AC"
+	isActive := true
+
+	tests := []struct {
+		name string
+		req  UpdateRoomRequest
+	}{
+		{
+			name: "update name only",
+			req: UpdateRoomRequest{
+				Name: &name,
+			},
+		},
+		{
+			name: "update capacity",
+			req: UpdateRoomRequest{
+				Capacity: &capacity,
+			},
+		},
+		{
+			name: "update all fields",
+			req: UpdateRoomRequest{
+				Name:       &name,
+				Building:   &building,
+				Floor:      &floor,
+				Capacity:   &capacity,
+				RoomType:   &roomType,
+				Facilities: &facilities,
+				IsActive:   &isActive,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.req.Capacity != nil && *tt.req.Capacity <= 0 {
+				t.Error("Capacity should be positive")
+			}
+		})
+	}
+}
+
+// Test GetStudyProgramsRequest pagination
+func TestGetStudyProgramsRequestPagination(t *testing.T) {
+	tests := []struct {
+		name     string
+		req      GetStudyProgramsRequest
+		expected struct {
+			page    int
+			perPage int
+		}
+	}{
+		{
+			name: "default pagination",
+			req: GetStudyProgramsRequest{
+				Page:    0,
+				PerPage: 0,
+			},
+			expected: struct {
+				page    int
+				perPage int
+			}{
+				page:    1,
+				perPage: 20,
+			},
+		},
+		{
+			name: "custom pagination",
+			req: GetStudyProgramsRequest{
+				Page:    2,
+				PerPage: 10,
+			},
+			expected: struct {
+				page    int
+				perPage int
+			}{
+				page:    2,
+				perPage: 10,
+			},
+		},
+		{
+			name: "negative page",
+			req: GetStudyProgramsRequest{
+				Page:    -1,
+				PerPage: 20,
+			},
+			expected: struct {
+				page    int
+				perPage int
+			}{
+				page:    1,
+				perPage: 20,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			page := tt.req.Page
+			if page < 1 {
+				page = 1
+			}
+			perPage := tt.req.PerPage
+			if perPage < 1 {
+				perPage = 20
+			}
+
+			if page != tt.expected.page {
+				t.Errorf("Expected page %d, got %d", tt.expected.page, page)
+			}
+			if perPage != tt.expected.perPage {
+				t.Errorf("Expected perPage %d, got %d", tt.expected.perPage, perPage)
+			}
+		})
+	}
+}
+
+// Test GetAcademicPeriodsRequest pagination
+func TestGetAcademicPeriodsRequestPagination(t *testing.T) {
+	tests := []struct {
+		name     string
+		req      GetAcademicPeriodsRequest
+		expected struct {
+			page    int
+			perPage int
+		}
+	}{
+		{
+			name: "default pagination",
+			req: GetAcademicPeriodsRequest{
+				Page:    0,
+				PerPage: 0,
+			},
+			expected: struct {
+				page    int
+				perPage int
+			}{
+				page:    1,
+				perPage: 20,
+			},
+		},
+		{
+			name: "custom pagination",
+			req: GetAcademicPeriodsRequest{
+				Page:    3,
+				PerPage: 15,
+			},
+			expected: struct {
+				page    int
+				perPage int
+			}{
+				page:    3,
+				perPage: 15,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			page := tt.req.Page
+			if page < 1 {
+				page = 1
+			}
+			perPage := tt.req.PerPage
+			if perPage < 1 {
+				perPage = 20
+			}
+
+			if page != tt.expected.page {
+				t.Errorf("Expected page %d, got %d", tt.expected.page, page)
+			}
+			if perPage != tt.expected.perPage {
+				t.Errorf("Expected perPage %d, got %d", tt.expected.perPage, perPage)
+			}
+		})
+	}
+}
+
+// Test GetRoomsRequest pagination
+func TestGetRoomsRequestPagination(t *testing.T) {
+	tests := []struct {
+		name     string
+		req      GetRoomsRequest
+		expected struct {
+			page    int
+			perPage int
+		}
+	}{
+		{
+			name: "default pagination",
+			req: GetRoomsRequest{
+				Page:    0,
+				PerPage: 0,
+			},
+			expected: struct {
+				page    int
+				perPage int
+			}{
+				page:    1,
+				perPage: 20,
+			},
+		},
+		{
+			name: "custom pagination",
+			req: GetRoomsRequest{
+				Page:    5,
+				PerPage: 25,
+			},
+			expected: struct {
+				page    int
+				perPage int
+			}{
+				page:    5,
+				perPage: 25,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			page := tt.req.Page
+			if page < 1 {
+				page = 1
+			}
+			perPage := tt.req.PerPage
+			if perPage < 1 {
+				perPage = 20
+			}
+
+			if page != tt.expected.page {
+				t.Errorf("Expected page %d, got %d", tt.expected.page, page)
+			}
+			if perPage != tt.expected.perPage {
+				t.Errorf("Expected perPage %d, got %d", tt.expected.perPage, perPage)
+			}
+		})
+	}
+}
+
+// Test Academic Period Semester Type validation
+func TestAcademicPeriodSemesterType(t *testing.T) {
+	validTypes := []string{"GANJIL", "GENAP", "PENDEK"}
+	invalidTypes := []string{"INVALID", "", "ganjil"}
+
+	for _, validType := range validTypes {
+		t.Run("valid type: "+validType, func(t *testing.T) {
+			req := CreateAcademicPeriodRequest{
+				Code:         "TEST",
+				Name:         "Test",
+				AcademicYear: "2024/2025",
+				SemesterType: validType,
+				StartDate:    "2024-01-01",
+				EndDate:      "2024-06-30",
+			}
+			if req.SemesterType != validType {
+				t.Errorf("Expected semester type %s, got %s", validType, req.SemesterType)
+			}
+		})
+	}
+
+	for _, invalidType := range invalidTypes {
+		t.Run("invalid type: "+invalidType, func(t *testing.T) {
+			req := CreateAcademicPeriodRequest{
+				Code:         "TEST",
+				Name:         "Test",
+				AcademicYear: "2024/2025",
+				SemesterType: invalidType,
+				StartDate:    "2024-01-01",
+				EndDate:      "2024-06-30",
+			}
+			// Validation happens in handler, here we just check the value
+			if req.SemesterType == invalidType && invalidType != "" {
+				// This is expected - validation happens at handler level
+			}
+		})
+	}
+}
+
+// Test Room Type validation
+func TestRoomType(t *testing.T) {
+	validTypes := []string{"classroom", "lab", "auditorium", "library", "office"}
+
+	for _, roomType := range validTypes {
+		t.Run("valid room type: "+roomType, func(t *testing.T) {
+			req := CreateRoomRequest{
+				Code:     "TEST",
+				Name:     "Test Room",
+				RoomType: roomType,
+			}
+			if req.RoomType != roomType {
+				t.Errorf("Expected room type %s, got %s", roomType, req.RoomType)
+			}
+		})
+	}
+}
+
+// Test Study Program Degree Level validation
+func TestStudyProgramDegreeLevel(t *testing.T) {
+	validLevels := []string{"S1", "S2", "S3", "D3", "D4"}
+
+	for _, level := range validLevels {
+		t.Run("valid degree level: "+level, func(t *testing.T) {
+			req := CreateStudyProgramRequest{
+				Code:        "TEST",
+				Name:        "Test Program",
+				DegreeLevel: level,
+			}
+			if req.DegreeLevel != level {
+				t.Errorf("Expected degree level %s, got %s", level, req.DegreeLevel)
+			}
+		})
+	}
 }

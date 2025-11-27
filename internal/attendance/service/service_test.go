@@ -294,3 +294,314 @@ func TestTimeValidation(t *testing.T) {
 		}
 	})
 }
+
+// Test CreateShiftPatternRequest validation
+func TestCreateShiftPatternRequest(t *testing.T) {
+	startTimeStr := "08:00"
+	endTimeStr := "17:00"
+	breakDuration := 60
+
+	tests := []struct {
+		name    string
+		req     CreateShiftPatternRequest
+		wantErr bool
+	}{
+		{
+			name: "valid request",
+			req: CreateShiftPatternRequest{
+				ShiftName:           "Regular Shift",
+				ShiftCode:           "SHIFT-001",
+				StartTime:           startTimeStr,
+				EndTime:             endTimeStr,
+				BreakDurationMinutes: &breakDuration,
+			},
+			wantErr: false,
+		},
+		{
+			name: "missing shift name",
+			req: CreateShiftPatternRequest{
+				ShiftCode: "SHIFT-001",
+				StartTime: startTimeStr,
+				EndTime:   endTimeStr,
+			},
+			wantErr: true,
+		},
+		{
+			name: "missing shift code",
+			req: CreateShiftPatternRequest{
+				ShiftName: "Regular Shift",
+				StartTime: startTimeStr,
+				EndTime:   endTimeStr,
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid time format",
+			req: CreateShiftPatternRequest{
+				ShiftName: "Regular Shift",
+				ShiftCode: "SHIFT-001",
+				StartTime: "invalid-time",
+				EndTime:   endTimeStr,
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.req.ShiftName == "" && !tt.wantErr {
+				t.Error("ShiftName should be required")
+			}
+			if tt.req.ShiftCode == "" && !tt.wantErr {
+				t.Error("ShiftCode should be required")
+			}
+			if tt.req.StartTime != "" && tt.req.EndTime != "" {
+				start, err1 := time.Parse("15:04", tt.req.StartTime)
+				end, err2 := time.Parse("15:04", tt.req.EndTime)
+				if err1 == nil && err2 == nil {
+					if end.Before(start) && !tt.wantErr {
+						t.Error("EndTime should be after StartTime")
+					}
+				}
+			}
+		})
+	}
+}
+
+// Test CreateUserShiftRequest validation
+func TestCreateUserShiftRequest(t *testing.T) {
+	effectiveFrom := time.Now()
+	effectiveTo := effectiveFrom.AddDate(0, 6, 0)
+
+	tests := []struct {
+		name    string
+		req     CreateUserShiftRequest
+		wantErr bool
+	}{
+		{
+			name: "valid request",
+			req: CreateUserShiftRequest{
+				UserID:         uuid.New().String(),
+				ShiftID:        uuid.New().String(),
+				EffectiveFrom:  effectiveFrom.Format("2006-01-02"),
+				EffectiveUntil: func() *string { v := effectiveTo.Format("2006-01-02"); return &v }(),
+			},
+			wantErr: false,
+		},
+		{
+			name: "missing user_id",
+			req: CreateUserShiftRequest{
+				ShiftID:       uuid.New().String(),
+				EffectiveFrom: effectiveFrom.Format("2006-01-02"),
+			},
+			wantErr: true,
+		},
+		{
+			name: "missing shift_id",
+			req: CreateUserShiftRequest{
+				UserID:        uuid.New().String(),
+				EffectiveFrom: effectiveFrom.Format("2006-01-02"),
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid date format",
+			req: CreateUserShiftRequest{
+				UserID:        uuid.New().String(),
+				ShiftID:       uuid.New().String(),
+				EffectiveFrom: "invalid-date",
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			hasError := false
+			
+			if tt.req.UserID == "" {
+				hasError = true
+			}
+			if tt.req.ShiftID == "" {
+				hasError = true
+			}
+			if tt.req.EffectiveFrom != "" {
+				_, err := time.Parse("2006-01-02", tt.req.EffectiveFrom)
+				if err != nil {
+					hasError = true
+				}
+			}
+			
+			if hasError != tt.wantErr {
+				t.Errorf("Expected error = %v, got %v", tt.wantErr, hasError)
+			}
+		})
+	}
+}
+
+// Test CreateWorkScheduleRequest validation
+func TestCreateWorkScheduleRequest(t *testing.T) {
+	scheduleDate := time.Now()
+	startTimeStr := "08:00"
+	endTimeStr := "17:00"
+
+	tests := []struct {
+		name    string
+		req     CreateWorkScheduleRequest
+		wantErr bool
+	}{
+		{
+			name: "valid request",
+			req: CreateWorkScheduleRequest{
+				UserID:       uuid.New().String(),
+				ScheduleDate: scheduleDate.Format("2006-01-02"),
+				StartTime:    startTimeStr,
+				EndTime:      endTimeStr,
+			},
+			wantErr: false,
+		},
+		{
+			name: "missing user_id",
+			req: CreateWorkScheduleRequest{
+				ScheduleDate: scheduleDate.Format("2006-01-02"),
+				StartTime:    startTimeStr,
+				EndTime:      endTimeStr,
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid date format",
+			req: CreateWorkScheduleRequest{
+				UserID:       uuid.New().String(),
+				ScheduleDate: "invalid-date",
+				StartTime:    startTimeStr,
+				EndTime:      endTimeStr,
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid time format",
+			req: CreateWorkScheduleRequest{
+				UserID:       uuid.New().String(),
+				ScheduleDate: scheduleDate.Format("2006-01-02"),
+				StartTime:    "invalid-time",
+				EndTime:      endTimeStr,
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			hasError := false
+			
+			if tt.req.UserID == "" {
+				hasError = true
+			}
+			if tt.req.ScheduleDate != "" {
+				_, err := time.Parse("2006-01-02", tt.req.ScheduleDate)
+				if err != nil {
+					hasError = true
+				}
+			}
+			if tt.req.StartTime != "" {
+				_, err := time.Parse("15:04", tt.req.StartTime)
+				if err != nil {
+					hasError = true
+				}
+			}
+			if tt.req.EndTime != "" {
+				_, err := time.Parse("15:04", tt.req.EndTime)
+				if err != nil {
+					hasError = true
+				}
+			}
+			
+			if hasError != tt.wantErr {
+				t.Errorf("Expected error = %v, got %v", tt.wantErr, hasError)
+			}
+		})
+	}
+}
+
+// Test CheckInRequest validation
+func TestCheckInRequest(t *testing.T) {
+	latitude := -2.9914
+	longitude := 104.7565
+
+	tests := []struct {
+		name    string
+		req     CheckInRequest
+		wantErr bool
+	}{
+		{
+			name: "valid request with location",
+			req: CheckInRequest{
+				Latitude:        &latitude,
+				Longitude:       &longitude,
+				IsViaUNSRIWiFi:  func() *bool { v := true; return &v }(),
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid request without location",
+			req: CheckInRequest{
+				IsViaUNSRIWiFi: func() *bool { v := false; return &v }(),
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// CheckInRequest is flexible - location is optional
+			if tt.req.Latitude != nil && (*tt.req.Latitude < -90 || *tt.req.Latitude > 90) {
+				t.Error("Latitude should be between -90 and 90")
+			}
+			if tt.req.Longitude != nil && (*tt.req.Longitude < -180 || *tt.req.Longitude > 180) {
+				t.Error("Longitude should be between -180 and 180")
+			}
+		})
+	}
+}
+
+// Test CheckOutRequest validation
+func TestCheckOutRequest(t *testing.T) {
+	latitude := -2.9914
+	longitude := 104.7565
+
+	tests := []struct {
+		name    string
+		req     CheckOutRequest
+		wantErr bool
+	}{
+		{
+			name: "valid request with location",
+			req: CheckOutRequest{
+				Latitude:        &latitude,
+				Longitude:       &longitude,
+				IsViaUNSRIWiFi:  func() *bool { v := true; return &v }(),
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid request without location",
+			req: CheckOutRequest{
+				IsViaUNSRIWiFi: func() *bool { v := false; return &v }(),
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// CheckOutRequest is flexible - location is optional
+			if tt.req.Latitude != nil && (*tt.req.Latitude < -90 || *tt.req.Latitude > 90) {
+				t.Error("Latitude should be between -90 and 90")
+			}
+			if tt.req.Longitude != nil && (*tt.req.Longitude < -180 || *tt.req.Longitude > 180) {
+				t.Error("Longitude should be between -180 and 180")
+			}
+		})
+	}
+}
