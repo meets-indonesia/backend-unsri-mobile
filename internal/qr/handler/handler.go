@@ -129,3 +129,20 @@ func (h *QRHandler) RegenerateClassQR(c *gin.Context) {
 	utils.SuccessResponse(c, 200, result)
 }
 
+// ValidateGateQR handles validate gate QR request (public endpoint for gate UNSRI)
+func (h *QRHandler) ValidateGateQR(c *gin.Context) {
+	var req service.ValidateGateQRRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ErrorResponse(c, 400, err)
+		return
+	}
+
+	result, err := h.service.ValidateGateQR(c.Request.Context(), req)
+	if err != nil {
+		utils.ErrorResponse(c, 0, err)
+		return
+	}
+
+	utils.SuccessResponse(c, 200, result)
+}
+

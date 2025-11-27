@@ -105,3 +105,21 @@ func (r *QRRepository) GetUserAccessQRByToken(ctx context.Context, token string)
 	return &userQR, nil
 }
 
+// GetUserAccessQRByTokenWithUser gets user access QR by token with user data
+func (r *QRRepository) GetUserAccessQRByTokenWithUser(ctx context.Context, token string) (*models.UserAccessQR, error) {
+	var userQR models.UserAccessQR
+	if err := r.db.WithContext(ctx).
+		Preload("User").
+		Preload("User.Mahasiswa").
+		Preload("User.Dosen").
+		Preload("User.Staff").
+		Where("qr_token = ? AND is_active = ?", token, true).
+		First(&userQR).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("user access QR not found")
+		}
+		return nil, err
+	}
+	return &userQR, nil
+}
+

@@ -16,6 +16,7 @@ import (
 	"unsri-backend/internal/shared/database"
 	"unsri-backend/internal/shared/logger"
 	"unsri-backend/internal/shared/models"
+	userRepo "unsri-backend/internal/user/repository"
 	"unsri-backend/pkg/jwt"
 )
 
@@ -43,6 +44,10 @@ func main() {
 	if err := db.AutoMigrate(
 		&models.AttendanceSession{},
 		&models.UserAccessQR{},
+		&models.User{},
+		&models.Mahasiswa{},
+		&models.Dosen{},
+		&models.Staff{},
 	); err != nil {
 		log.Fatal("Failed to migrate database", err)
 	}
@@ -54,7 +59,8 @@ func main() {
 	)
 
 	qrRepo := repository.NewQRRepository(db)
-	qrService := service.NewQRService(qrRepo)
+	userRepository := userRepo.NewUserRepository(db)
+	qrService := service.NewQRService(qrRepo, userRepository)
 	qrHandler := handler.NewQRHandler(qrService, log)
 
 	router := gin.Default()

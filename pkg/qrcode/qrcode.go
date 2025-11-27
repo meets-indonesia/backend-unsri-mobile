@@ -14,6 +14,15 @@ type QRData struct {
 	ScheduleID string    `json:"schedule_id"`
 	ExpiresAt  time.Time `json:"expires_at"`
 	Type       string    `json:"type"` // "kelas", "kampus", "gate"
+
+	// Gate access specific fields (for UNSRI gate integration)
+	UserID   string `json:"user_id,omitempty"`
+	QRToken  string `json:"qr_token,omitempty"`
+	UserName string `json:"user_name,omitempty"`
+	UserRole string `json:"user_role,omitempty"`
+	NIM      string `json:"nim,omitempty"`   // For mahasiswa
+	NIP      string `json:"nip,omitempty"`   // For dosen/staff
+	Prodi    string `json:"prodi,omitempty"` // Program Studi
 }
 
 // GenerateQRCode generates a QR code image from data
@@ -40,4 +49,3 @@ func ParseQRData(data string) (*QRData, error) {
 
 	return &qrData, nil
 }
-

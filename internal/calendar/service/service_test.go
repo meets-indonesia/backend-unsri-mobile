@@ -4,9 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/uuid"
 	apperrors "unsri-backend/internal/shared/errors"
 	"unsri-backend/internal/shared/models"
+
+	"github.com/google/uuid"
 )
 
 // Test helper functions
@@ -122,7 +123,7 @@ func TestCreateEventRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			hasError := false
-			
+
 			if tt.req.Title == "" {
 				hasError = true
 			}
@@ -138,11 +139,10 @@ func TestCreateEventRequest(t *testing.T) {
 					hasError = true
 				}
 			}
-			
+
 			if hasError != tt.wantErr {
 				t.Errorf("Expected error = %v, got %v", tt.wantErr, hasError)
 			}
 		})
 	}
 }
-

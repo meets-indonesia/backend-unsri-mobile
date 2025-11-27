@@ -10,17 +10,22 @@ import (
 	apperrors "unsri-backend/internal/shared/errors"
 	"unsri-backend/internal/shared/models"
 	"unsri-backend/internal/qr/repository"
+	userRepo "unsri-backend/internal/user/repository"
 	"unsri-backend/pkg/qrcode"
 )
 
 // QRService handles QR code business logic
 type QRService struct {
-	repo *repository.QRRepository
+	repo     *repository.QRRepository
+	userRepo *userRepo.UserRepository
 }
 
 // NewQRService creates a new QR service
-func NewQRService(repo *repository.QRRepository) *QRService {
-	return &QRService{repo: repo}
+func NewQRService(repo *repository.QRRepository, userRepo *userRepo.UserRepository) *QRService {
+	return &QRService{
+		repo:     repo,
+		userRepo: userRepo,
+	}
 }
 
 // GenerateQRRequest represents generate QR request
@@ -220,18 +225,23 @@ type GenerateAccessQRRequest struct {
 
 // GenerateAccessQR generates a unique campus access QR code for user (gate access)
 // This QR is unique per user and does not change
+// QR contains user data for gate validation
 func (s *QRService) GenerateAccessQR(ctx context.Context, userID string) (*GenerateQRResponse, error) {
+	// Get user data with role-specific information
+	user, err := s.userRepo.GetUserByID(ctx, userID)
+	if err != nil {
+		return nil, apperrors.NewNotFoundError("user", userID)
+	}
+
+	if !user.IsActive {
+		return nil, apperrors.NewBadRequestError("user is inactive")
+	}
+
 	// Check if user already has an access QR
 	userQR, err := s.repo.GetUserAccessQR(ctx, userID)
 	if err == nil && userQR != nil {
-		// User already has QR, return existing one
-		qrData := qrcode.QRData{
-			SessionID:  userQR.QRToken, // Use QRToken as identifier
-			ScheduleID: "",
-			ExpiresAt:  time.Now().Add(365 * 24 * time.Hour), // 1 year validity
-			Type:       "gate",
-		}
-
+		// User already has QR, regenerate with updated user data
+		qrData := s.buildGateQRData(userQR.QRToken, user)
 		qrImage, err := qrcode.GenerateQRCode(qrData)
 		if err != nil {
 			return nil, apperrors.NewInternalError("failed to generate QR code", err)
@@ -262,14 +272,8 @@ func (s *QRService) GenerateAccessQR(ctx context.Context, userID string) (*Gener
 		return nil, apperrors.NewInternalError("failed to create user access QR", err)
 	}
 
-	// Generate QR code image
-	qrData := qrcode.QRData{
-		SessionID:  qrToken,
-		ScheduleID: "",
-		ExpiresAt:  time.Now().Add(365 * 24 * time.Hour), // 1 year validity
-		Type:       "gate",
-	}
-
+	// Generate QR code image with user data
+	qrData := s.buildGateQRData(qrToken, user)
 	qrImage, err := qrcode.GenerateQRCode(qrData)
 	if err != nil {
 		return nil, apperrors.NewInternalError("failed to generate QR code", err)
@@ -282,9 +286,39 @@ func (s *QRService) GenerateAccessQR(ctx context.Context, userID string) (*Gener
 	}, nil
 }
 
+// buildGateQRData builds QR data structure for gate access with user information
+func (s *QRService) buildGateQRData(qrToken string, user *models.User) qrcode.QRData {
+	qrData := qrcode.QRData{
+		SessionID:  qrToken,
+		ScheduleID: "",
+		ExpiresAt:  time.Now().Add(365 * 24 * time.Hour), // 1 year validity
+		Type:       "gate",
+		UserID:     user.ID,
+		QRToken:    qrToken,
+		UserRole:   string(user.Role),
+	}
+
+	// Add role-specific data
+	if user.Role == models.RoleMahasiswa && user.Mahasiswa != nil {
+		qrData.UserName = user.Mahasiswa.Nama
+		qrData.NIM = user.Mahasiswa.NIM
+		qrData.Prodi = user.Mahasiswa.Prodi
+	} else if user.Role == models.RoleDosen && user.Dosen != nil {
+		qrData.UserName = user.Dosen.Nama
+		qrData.NIP = user.Dosen.NIP
+		qrData.Prodi = user.Dosen.Prodi
+	} else if user.Role == models.RoleStaff && user.Staff != nil {
+		qrData.UserName = user.Staff.Nama
+		qrData.NIP = user.Staff.NIP
+		qrData.Prodi = user.Staff.Unit // Use Unit for staff
+	}
+
+	return qrData
+}
+
 // ValidateAccessQR validates a gate access QR code
 func (s *QRService) ValidateAccessQR(ctx context.Context, qrToken string) (*ValidateQRResponse, error) {
-	userQR, err := s.repo.GetUserAccessQRByToken(ctx, qrToken)
+	userQR, err := s.repo.GetUserAccessQRByTokenWithUser(ctx, qrToken)
 	if err != nil {
 		return &ValidateQRResponse{
 			Valid:   false,
@@ -299,12 +333,115 @@ func (s *QRService) ValidateAccessQR(ctx context.Context, qrToken string) (*Vali
 		}, nil
 	}
 
+	// Check if user is active
+	if !userQR.User.IsActive {
+		return &ValidateQRResponse{
+			Valid:   false,
+			Message: "User account is inactive",
+		}, nil
+	}
+
+	// Build user data response
+	userData := map[string]interface{}{
+		"user_id":   userQR.UserID,
+		"role":      string(userQR.User.Role),
+		"is_active":  userQR.User.IsActive,
+	}
+
+	// Add role-specific data
+	if userQR.User.Role == models.RoleMahasiswa && userQR.User.Mahasiswa != nil {
+		userData["nama"] = userQR.User.Mahasiswa.Nama
+		userData["nim"] = userQR.User.Mahasiswa.NIM
+		userData["prodi"] = userQR.User.Mahasiswa.Prodi
+	} else if userQR.User.Role == models.RoleDosen && userQR.User.Dosen != nil {
+		userData["nama"] = userQR.User.Dosen.Nama
+		userData["nip"] = userQR.User.Dosen.NIP
+		userData["prodi"] = userQR.User.Dosen.Prodi
+	} else if userQR.User.Role == models.RoleStaff && userQR.User.Staff != nil {
+		userData["nama"] = userQR.User.Staff.Nama
+		userData["nip"] = userQR.User.Staff.NIP
+		userData["unit"] = userQR.User.Staff.Unit
+		userData["jabatan"] = userQR.User.Staff.Jabatan
+	}
+
 	return &ValidateQRResponse{
 		Valid:   true,
 		Message: "QR code is valid",
-		Data: map[string]interface{}{
-			"user_id": userQR.UserID,
-		},
+		Data:    userData,
+	}, nil
+}
+
+// ValidateGateQRRequest represents request to validate QR from gate UNSRI
+type ValidateGateQRRequest struct {
+	QRData string `json:"qr_data" binding:"required"` // QR code data (JSON string from QR scan)
+}
+
+// ValidateGateQRResponse represents response for gate QR validation
+type ValidateGateQRResponse struct {
+	Valid    bool                   `json:"valid"`
+	Allowed  bool                   `json:"allowed"`
+	UserData map[string]interface{} `json:"user_data,omitempty"`
+	Message  string                 `json:"message"`
+}
+
+// ValidateGateQR validates QR code from gate UNSRI
+// This is a public endpoint for gate system to validate user QR codes
+func (s *QRService) ValidateGateQR(ctx context.Context, req ValidateGateQRRequest) (*ValidateGateQRResponse, error) {
+	// Parse QR data
+	qrData, err := qrcode.ParseQRData(req.QRData)
+	if err != nil {
+		return &ValidateGateQRResponse{
+			Valid:   false,
+			Allowed: false,
+			Message: "Invalid QR code format",
+		}, nil
+	}
+
+	// Check if it's a gate QR
+	if qrData.Type != "gate" {
+		return &ValidateGateQRResponse{
+			Valid:   false,
+			Allowed: false,
+			Message: "QR code is not a gate access QR",
+		}, nil
+	}
+
+	// Validate using QR token
+	validateResp, err := s.ValidateAccessQR(ctx, qrData.QRToken)
+	if err != nil {
+		return &ValidateGateQRResponse{
+			Valid:   false,
+			Allowed: false,
+			Message: "Failed to validate QR code",
+		}, nil
+	}
+
+	if !validateResp.Valid {
+		return &ValidateGateQRResponse{
+			Valid:   false,
+			Allowed: false,
+			Message: validateResp.Message,
+		}, nil
+	}
+
+	// Verify QR data matches database
+	if qrData.UserID != "" {
+		userData, ok := validateResp.Data["user_id"].(string)
+		if !ok || userData != qrData.UserID {
+			return &ValidateGateQRResponse{
+				Valid:   false,
+				Allowed: false,
+				Message: "QR code data mismatch",
+			}, nil
+		}
+	}
+
+	// User is valid and active
+	return &ValidateGateQRResponse{
+		Valid:    true,
+		Allowed:  true,
+		UserData: validateResp.Data,
+		Message:  "Access granted",
 	}, nil
 }
 

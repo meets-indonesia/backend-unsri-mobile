@@ -12,6 +12,13 @@ func SetupRoutes(router *gin.Engine, handler *QRHandler, jwtToken *jwt.JWT) {
 		c.JSON(200, gin.H{"status": "ok", "service": "qr-service"})
 	})
 
+	// Public endpoint for gate UNSRI validation (no auth required)
+	public := router.Group("/api/v1/qr")
+	{
+		// Gate UNSRI validation endpoint (public)
+		public.POST("/gate/validate", handler.ValidateGateQR)
+	}
+
 	v1 := router.Group("/api/v1/qr")
 	v1.Use(middleware.AuthMiddleware(jwtToken))
 	{
