@@ -9,6 +9,10 @@ on:
 env:
   GO_VERSION: '1.24'
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   deploy-staging:
     name: Deploy to Staging
@@ -26,8 +30,15 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set lower case owner name
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
+        env:
+          OWNER: '${{ github.repository_owner }}'
 
       - name: Build and push Docker images
         run: |
@@ -55,11 +66,11 @@ jobs:
           for service in "${SERVICES[@]}"; do
             docker build \
               -f deployments/docker/Dockerfile.$service \
-              -t ${{ secrets.DOCKER_USERNAME }}/unsri-$service:staging \
-              -t ${{ secrets.DOCKER_USERNAME }}/unsri-$service:${{ github.sha }} \
+              -t ghcr.io/${{ env.OWNER_LC }}/unsri-$service:staging \
+              -t ghcr.io/${{ env.OWNER_LC }}/unsri-$service:${{ github.sha }} \
               .
-            docker push ${{ secrets.DOCKER_USERNAME }}/unsri-$service:staging
-            docker push ${{ secrets.DOCKER_USERNAME }}/unsri-$service:${{ github.sha }}
+            docker push ghcr.io/${{ env.OWNER_LC }}/unsri-$service:staging
+            docker push ghcr.io/${{ env.OWNER_LC }}/unsri-$service:${{ github.sha }}
           done
 
       - name: Deploy to staging server
@@ -69,6 +80,8 @@ jobs:
           username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.STAGING_SSH_KEY }}
           script: |
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            export REGISTRY=ghcr.io/${{ env.OWNER_LC }}
             cd /opt/unsri-backend
             docker-compose pull
             docker-compose up -d
@@ -90,8 +103,15 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set lower case owner name
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
+        env:
+          OWNER: '${{ github.repository_owner }}'
 
       - name: Extract version tag
         id: tag
@@ -124,11 +144,11 @@ jobs:
           for service in "${SERVICES[@]}"; do
             docker build \
               -f deployments/docker/Dockerfile.$service \
-              -t ${{ secrets.DOCKER_USERNAME }}/unsri-$service:$VERSION \
-              -t ${{ secrets.DOCKER_USERNAME }}/unsri-$service:latest \
+              -t ghcr.io/${{ env.OWNER_LC }}/unsri-$service:$VERSION \
+              -t ghcr.io/${{ env.OWNER_LC }}/unsri-$service:latest \
               .
-            docker push ${{ secrets.DOCKER_USERNAME }}/unsri-$service:$VERSION
-            docker push ${{ secrets.DOCKER_USERNAME }}/unsri-$service:latest
+            docker push ghcr.io/${{ env.OWNER_LC }}/unsri-$service:$VERSION
+            docker push ghcr.io/${{ env.OWNER_LC }}/unsri-$service:latest
           done
 
       - name: Deploy to production server
@@ -138,6 +158,8 @@ jobs:
           username: ${{ secrets.PRODUCTION_USER }}
           key: ${{ secrets.PRODUCTION_SSH_KEY }}
           script: |
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            export REGISTRY=ghcr.io/${{ env.OWNER_LC }}
             cd /opt/unsri-backend
             export VERSION=${{ steps.tag.outputs.VERSION }}
             docker-compose pull
@@ -161,4 +183,3 @@ jobs:
             All services tagged with version ${{ steps.tag.outputs.VERSION }}
           draft: false
           prerelease: false
-
