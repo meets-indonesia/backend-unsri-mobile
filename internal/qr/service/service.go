@@ -82,7 +82,7 @@ func (s *QRService) GenerateQR(ctx context.Context, createdBy string, req Genera
 	}
 
 	qrData.SessionID = session.ID
-	qrImage, _ = qrcode.GenerateQRCode(qrData)
+	qrImage, _ := qrcode.GenerateQRCode(qrData)
 
 	return &GenerateQRResponse{
 		ID:        session.ID,
