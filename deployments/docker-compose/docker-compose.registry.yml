@@ -138,6 +138,336 @@ services:
       - unsri-network
     restart: unless-stopped
 
+  master-data-service:
+    image: ${REGISTRY:-your-registry.com}/unsri-master-data-service:${VERSION:-latest}
+    container_name: unsri-master-data-service
+    ports:
+      - "8096:8096"
+    environment:
+      - PORT=8096
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  attendance-service:
+    image: ${REGISTRY:-your-registry.com}/unsri-attendance-service:${VERSION:-latest}
+    container_name: unsri-attendance-service
+    ports:
+      - "8084:8084"
+    environment:
+      - PORT=8084
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  schedule-service:
+    image: ${REGISTRY:-your-registry.com}/unsri-schedule-service:${VERSION:-latest}
+    container_name: unsri-schedule-service
+    ports:
+      - "8083:8083"
+    environment:
+      - PORT=8083
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  qr-service:
+    image: ${REGISTRY:-your-registry.com}/unsri-qr-service:${VERSION:-latest}
+    container_name: unsri-qr-service
+    ports:
+      - "8085:8085"
+    environment:
+      - PORT=8085
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  course-service:
+    image: ${REGISTRY:-your-registry.com}/unsri-course-service:${VERSION:-latest}
+    container_name: unsri-course-service
+    ports:
+      - "8089:8089"
+    environment:
+      - PORT=8089
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  broadcast-service:
+    image: ${REGISTRY:-your-registry.com}/unsri-broadcast-service:${VERSION:-latest}
+    container_name: unsri-broadcast-service
+    ports:
+      - "8086:8086"
+    environment:
+      - PORT=8086
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  notification-service:
+    image: ${REGISTRY:-your-registry.com}/unsri-notification-service:${VERSION:-latest}
+    container_name: unsri-notification-service
+    ports:
+      - "8087:8087"
+    environment:
+      - PORT=8087
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  calendar-service:
+    image: ${REGISTRY:-your-registry.com}/unsri-calendar-service:${VERSION:-latest}
+    container_name: unsri-calendar-service
+    ports:
+      - "8088:8088"
+    environment:
+      - PORT=8088
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  location-service:
+    image: ${REGISTRY:-your-registry.com}/unsri-location-service:${VERSION:-latest}
+    container_name: unsri-location-service
+    ports:
+      - "8090:8090"
+    environment:
+      - PORT=8090
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  access-service:
+    image: ${REGISTRY:-your-registry.com}/unsri-access-service:${VERSION:-latest}
+    container_name: unsri-access-service
+    ports:
+      - "8091:8091"
+    environment:
+      - PORT=8091
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  quick-actions-service:
+    image: ${REGISTRY:-your-registry.com}/unsri-quick-actions-service:${VERSION:-latest}
+    container_name: unsri-quick-actions-service
+    ports:
+      - "8092:8092"
+    environment:
+      - PORT=8092
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  file-storage-service:
+    image: ${REGISTRY:-your-registry.com}/unsri-file-storage-service:${VERSION:-latest}
+    container_name: unsri-file-storage-service
+    ports:
+      - "8093:8093"
+    environment:
+      - PORT=8093
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  search-service:
+    image: ${REGISTRY:-your-registry.com}/unsri-search-service:${VERSION:-latest}
+    container_name: unsri-search-service
+    ports:
+      - "8094:8094"
+    environment:
+      - PORT=8094
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  report-service:
+    image: ${REGISTRY:-your-registry.com}/unsri-report-service:${VERSION:-latest}
+    container_name: unsri-report-service
+    ports:
+      - "8095:8095"
+    environment:
+      - PORT=8095
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  leave-service:
+    image: ${REGISTRY:-your-registry.com}/unsri-leave-service:${VERSION:-latest}
+    container_name: unsri-leave-service
+    ports:
+      - "8097:8097"
+    environment:
+      - PORT=8097
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   redis_data:
