@@ -1,0 +1,149 @@
+# Docker Compose configuration using images from Docker registry
+# Usage: docker-compose -f deployments/docker-compose/docker-compose.registry.yml up -d
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: unsri-postgres
+    environment:
+      POSTGRES_DB: unsri_db
+      POSTGRES_USER: unsri_user
+      POSTGRES_PASSWORD: unsri_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../../migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U unsri_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - unsri-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: unsri-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - unsri-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: unsri-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: unsri_user
+      RABBITMQ_DEFAULT_PASS: unsri_pass
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - unsri-network
+
+  api-gateway:
+    image: ${REGISTRY:-your-registry.com}/unsri-api-gateway:${VERSION:-latest}
+    container_name: unsri-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - LOG_LEVEL=info
+      - ENABLE_SWAGGER=${ENABLE_SWAGGER:-false}
+      - AUTH_SERVICE_URL=http://auth-service:8081
+      - USER_SERVICE_URL=http://user-service:8082
+      - ATTENDANCE_SERVICE_URL=http://attendance-service:8084
+      - SCHEDULE_SERVICE_URL=http://schedule-service:8083
+      - QR_SERVICE_URL=http://qr-service:8085
+      - COURSE_SERVICE_URL=http://course-service:8089
+      - BROADCAST_SERVICE_URL=http://broadcast-service:8086
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8087
+      - CALENDAR_SERVICE_URL=http://calendar-service:8088
+      - LOCATION_SERVICE_URL=http://location-service:8090
+      - ACCESS_SERVICE_URL=http://access-service:8091
+      - QUICK_ACTIONS_SERVICE_URL=http://quick-actions-service:8092
+      - FILE_SERVICE_URL=http://file-storage-service:8093
+      - SEARCH_SERVICE_URL=http://search-service:8094
+      - REPORT_SERVICE_URL=http://report-service:8095
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      - auth-service
+      - user-service
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  auth-service:
+    image: ${REGISTRY:-your-registry.com}/unsri-auth-service:${VERSION:-latest}
+    container_name: unsri-auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      - PORT=8081
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=your-secret-key-change-in-production
+      - JWT_ACCESS_TTL=15m
+      - JWT_REFRESH_TTL=7d
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+  user-service:
+    image: ${REGISTRY:-your-registry.com}/unsri-user-service:${VERSION:-latest}
+    container_name: unsri-user-service
+    ports:
+      - "8082:8082"
+    environment:
+      - PORT=8082
+      - LOG_LEVEL=info
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=unsri_user
+      - DATABASE_PASSWORD=unsri_pass
+      - DATABASE_NAME=unsri_db
+      - DATABASE_SSLMODE=disable
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - unsri-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+
+networks:
+  unsri-network:
+    driver: bridge
+
