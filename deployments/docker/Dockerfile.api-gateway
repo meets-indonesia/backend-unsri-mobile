@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Generate swagger docs (optional, will work even if docs don't exist)
-RUN swag init -g cmd/api-gateway/main.go --parseDependency --parseInternal -d ./cmd/api-gateway,./internal/api-gateway/handler || true
+RUN swag init -g cmd/api-gateway/swagger.go --parseDependency --parseInternal -d ./internal/api-gateway/handler
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/bin/api-gateway ./cmd/api-gateway
