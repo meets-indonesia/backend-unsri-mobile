@@ -853,7 +853,7 @@ func (h *ProxyHandler) proxyRequest(c *gin.Context, targetURL string) {
 	c.DataFromReader(resp.StatusCode, resp.ContentLength, resp.Header.Get("Content-Type"), resp.Body, nil)
 }
 
-func _keepImports() {
+func KeepImports() {
 	var _ accessService.ValidateQRRequest
 	var _ attendanceService.GenerateQRRequest
 	var _ authService.LoginRequest

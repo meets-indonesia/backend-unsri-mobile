@@ -81,7 +81,7 @@ func TestCreateLeaveRequestRequest(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			_, err := time.Parse("2006-01-02", tt.req.StartDate)
 			if (err != nil) != tt.wantErr && tt.req.StartDate != "invalid-date" {
-				// Only check date parsing if it's a date format issue
+				t.Errorf("expected error %v, got %v", tt.wantErr, err)
 			}
 			if tt.req.Reason == "" && !tt.wantErr {
 				t.Error("Reason should be required")

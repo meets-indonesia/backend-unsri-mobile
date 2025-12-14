@@ -1002,8 +1002,14 @@ func (s *AttendanceService) CheckOut(ctx context.Context, userID string, req Che
 	var schedule *models.WorkSchedule
 	if req.ScheduleID != nil {
 		schedule, err = s.repo.GetWorkScheduleByID(ctx, *req.ScheduleID)
+		if err != nil {
+			// Schedule not found is acceptable, proceed with basic record
+		}
 	} else if checkInRecord.ScheduleID != nil {
 		schedule, err = s.repo.GetWorkScheduleByID(ctx, *checkInRecord.ScheduleID)
+		if err != nil {
+			// Schedule not found is acceptable, proceed with basic record
+		}
 	}
 
 	// Determine status
