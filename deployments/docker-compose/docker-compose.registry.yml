@@ -64,7 +64,13 @@ services:
     environment:
       - PORT=8080
       - LOG_LEVEL=info
-      - ENABLE_SWAGGER=${ENABLE_SWAGGER:-false}
+      - ENABLE_SWAGGER=true
+      - RABBITMQ_HOST=unsri-rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=unsri_user
+      - RABBITMQ_PASSWORD=unsri_pass
+      - RABBITMQ_VHOST=/
+      - RABBITMQ_URL=amqp://unsri_user:unsri_pass@unsri-rabbitmq:5672/
       - AUTH_SERVICE_URL=http://auth-service:8081
       - USER_SERVICE_URL=http://user-service:8082
       - ATTENDANCE_SERVICE_URL=http://attendance-service:8084
