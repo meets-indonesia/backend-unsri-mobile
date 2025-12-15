@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
+	"unsri-backend/internal/master-data/repository"
 	apperrors "unsri-backend/internal/shared/errors"
 	"unsri-backend/internal/shared/models"
-	"unsri-backend/internal/master-data/repository"
 )
 
 // MasterDataService handles master data business logic
@@ -502,4 +502,3 @@ func (s *MasterDataService) DeleteRoom(ctx context.Context, id string) error {
 	}
 	return s.repo.DeleteRoom(ctx, id)
 }
-
