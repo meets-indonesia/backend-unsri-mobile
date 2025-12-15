@@ -40,7 +40,7 @@ services:
     image: rabbitmq:3-management-alpine
     container_name: unsri-rabbitmq
     ports:
-      - "5672:5672"   # AMQP port
+      - "5672:5672" # AMQP port
       - "15672:15672" # Management UI
     environment:
       RABBITMQ_DEFAULT_USER: unsri_user
@@ -516,24 +516,48 @@ services:
       - MASTER_DATA_SERVICE_URL=http://master-data-service:8096
       - LEAVE_SERVICE_URL=http://leave-service:8097
       - JWT_SECRET=your-secret-key-change-in-production
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=unsri_user
+      - RABBITMQ_PASSWORD=unsri_pass
+      - RABBITMQ_VHOST=/
     depends_on:
-      - auth-service
-      - user-service
-      - attendance-service
-      - schedule-service
-      - qr-service
-      - course-service
-      - broadcast-service
-      - notification-service
-      - calendar-service
-      - location-service
-      - access-service
-      - quick-actions-service
-      - file-storage-service
-      - search-service
-      - report-service
-      - master-data-service
-      - leave-service
+      rabbitmq:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      user-service:
+        condition: service_started
+      attendance-service:
+        condition: service_started
+      schedule-service:
+        condition: service_started
+      qr-service:
+        condition: service_started
+      course-service:
+        condition: service_started
+      broadcast-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+      calendar-service:
+        condition: service_started
+      location-service:
+        condition: service_started
+      access-service:
+        condition: service_started
+      quick-actions-service:
+        condition: service_started
+      file-storage-service:
+        condition: service_started
+      search-service:
+        condition: service_started
+      report-service:
+        condition: service_started
+      master-data-service:
+        condition: service_started
+      leave-service:
+        condition: service_started
     networks:
       - unsri-network
     restart: unless-stopped
@@ -547,4 +571,3 @@ volumes:
 networks:
   unsri-network:
     driver: bridge
-

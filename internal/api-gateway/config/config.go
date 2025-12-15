@@ -28,6 +28,12 @@ type Config struct {
 	LeaveServiceURL        string
 	LogLevel               string
 	JWTSecret              string
+	// RabbitMQ Configuration
+	RabbitMQHost     string
+	RabbitMQPort     string
+	RabbitMQUser     string
+	RabbitMQPassword string
+	RabbitMQVHost    string
 }
 
 // Load loads configuration from environment variables
@@ -52,6 +58,13 @@ func Load() *Config {
 	viper.SetDefault("MASTER_DATA_SERVICE_URL", "http://localhost:8096")
 	viper.SetDefault("LEAVE_SERVICE_URL", "http://localhost:8097")
 	viper.SetDefault("JWT_SECRET", "your-secret-key-change-in-production")
+	// RabbitMQ defaults (match dengan docker-compose)
+	// Use 127.0.0.1 instead of localhost to avoid IPv6 issues
+	viper.SetDefault("RABBITMQ_HOST", "127.0.0.1")
+	viper.SetDefault("RABBITMQ_PORT", "5672")
+	viper.SetDefault("RABBITMQ_USER", "unsri_user")
+	viper.SetDefault("RABBITMQ_PASSWORD", "unsri_pass")
+	viper.SetDefault("RABBITMQ_VHOST", "/")
 
 	_ = viper.BindEnv("PORT")
 	_ = viper.BindEnv("LOG_LEVEL")
@@ -73,6 +86,11 @@ func Load() *Config {
 	_ = viper.BindEnv("MASTER_DATA_SERVICE_URL")
 	_ = viper.BindEnv("LEAVE_SERVICE_URL")
 	_ = viper.BindEnv("JWT_SECRET")
+	_ = viper.BindEnv("RABBITMQ_HOST")
+	_ = viper.BindEnv("RABBITMQ_PORT")
+	_ = viper.BindEnv("RABBITMQ_USER")
+	_ = viper.BindEnv("RABBITMQ_PASSWORD")
+	_ = viper.BindEnv("RABBITMQ_VHOST")
 
 	viper.AutomaticEnv()
 
@@ -97,6 +115,11 @@ func Load() *Config {
 		MasterDataServiceURL:   getEnv("MASTER_DATA_SERVICE_URL", "http://localhost:8096"),
 		LeaveServiceURL:        getEnv("LEAVE_SERVICE_URL", "http://localhost:8097"),
 		JWTSecret:              getEnv("JWT_SECRET", "your-secret-key-change-in-production"),
+		RabbitMQHost:           getEnv("RABBITMQ_HOST", "127.0.0.1"),
+		RabbitMQPort:           getEnv("RABBITMQ_PORT", "5672"),
+		RabbitMQUser:           getEnv("RABBITMQ_USER", "unsri_user"),
+		RabbitMQPassword:       getEnv("RABBITMQ_PASSWORD", "unsri_pass"),
+		RabbitMQVHost:          getEnv("RABBITMQ_VHOST", "/"),
 	}
 }
 

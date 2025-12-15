@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"unsri-backend/internal/api-gateway/config"
 	"unsri-backend/internal/shared/logger"
@@ -30,17 +31,51 @@ import (
 
 // ProxyHandler handles request proxying to microservices
 type ProxyHandler struct {
-	cfg    *config.Config
-	logger logger.Logger
-	client *http.Client
+	cfg           *config.Config
+	logger        logger.Logger
+	client        *http.Client
+	messageBroker MessageBrokerService
+}
+
+// MessageBrokerService interface for message broker operations
+type MessageBrokerService interface {
+	PublishRequestLog(log *RequestLog) error
+	PublishAuditLog(log *AuditLog) error
+}
+
+// RequestLog represents a request log entry
+type RequestLog struct {
+	Timestamp    time.Time `json:"timestamp"`
+	Method       string    `json:"method"`
+	Path         string    `json:"path"`
+	Service      string    `json:"service"`
+	UserID       string    `json:"user_id,omitempty"`
+	IP           string    `json:"ip"`
+	UserAgent    string    `json:"user_agent"`
+	Status       int       `json:"status"`
+	Duration     int64     `json:"duration_ms"`
+	RequestSize  int64     `json:"request_size"`
+	ResponseSize int64     `json:"response_size"`
+}
+
+// AuditLog represents an audit log entry
+type AuditLog struct {
+	Timestamp  time.Time              `json:"timestamp"`
+	UserID     string                 `json:"user_id"`
+	Action     string                 `json:"action"`
+	Resource   string                 `json:"resource"`
+	ResourceID string                 `json:"resource_id,omitempty"`
+	IP         string                 `json:"ip"`
+	Metadata   map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // NewProxyHandler creates a new proxy handler
-func NewProxyHandler(cfg *config.Config, logger logger.Logger) *ProxyHandler {
+func NewProxyHandler(cfg *config.Config, logger logger.Logger, messageBroker MessageBrokerService) *ProxyHandler {
 	return &ProxyHandler{
-		cfg:    cfg,
-		logger: logger,
-		client: &http.Client{},
+		cfg:           cfg,
+		logger:        logger,
+		client:        &http.Client{Timeout: 30 * time.Second},
+		messageBroker: messageBroker,
 	}
 }
 
@@ -820,26 +855,44 @@ func (h *ProxyHandler) ProxyLeave(c *gin.Context) {
 
 // proxyRequest proxies a request to the target service
 func (h *ProxyHandler) proxyRequest(c *gin.Context, targetURL string) {
-	// Create new request
-	// Remove /api/v1 prefix as services likely don't expect it if they are mounted at root or have their own prefix reasoning
-	// However, looking at the previous logic: targetURL + c.Request.RequestURI
-	// If targetURL is http://master-data-service:8096 and URI is /api/v1/academic-periods/
-	// The result is http://master-data-service:8096/api/v1/academic-periods/
-	// If the service is listening on /, it might expect /academic-periods/ or /api/v1/academic-periods/
-	// Let's assume the services are standardized.
-	// BUT, specifically for the issue: "failed to reach service", 502 Bad Gateway usually means connection refused or host not found.
+	startTime := time.Now()
 
-	// Let's simply fix the path if needed, but first, logging the error in proxyRequest is missing.
+	// Extract service name from URL
+	serviceName := h.extractServiceName(targetURL)
 
-	targetPath := c.Request.RequestURI
-	// If the services are running without /api/v1 prefix internally, we should strip it.
-	// Most microservices frameworks (like Gin in your services) probably set up routes like /academic-periods or /api/v1/academic-periods.
-	// Let's assume they map 1:1 for now.
+	// Get user ID from context if available
+	userID := c.GetString("user_id")
+	if userID == "" {
+		// Try to extract from Authorization header
+		if authHeader := c.GetHeader("Authorization"); authHeader != "" {
+			// User ID will be set by auth middleware if token is valid
+		}
+	}
+
+	// Normalize path: use URL.Path which is already normalized by Gin
+	// Remove trailing slash except for root path to avoid redirect loops
+	normalizedPath := c.Request.URL.Path
+	if len(normalizedPath) > 1 && normalizedPath[len(normalizedPath)-1] == '/' {
+		normalizedPath = normalizedPath[:len(normalizedPath)-1]
+	}
+
+	// Build full URL with query string for proxying
+	targetPath := normalizedPath
+	if c.Request.URL.RawQuery != "" {
+		targetPath = normalizedPath + "?" + c.Request.URL.RawQuery
+	}
 
 	url := targetURL + targetPath
 
+	// Get request size
+	requestSize := c.Request.ContentLength
+	if requestSize < 0 {
+		requestSize = 0
+	}
+
 	req, err := http.NewRequest(c.Request.Method, url, c.Request.Body)
 	if err != nil {
+		h.logger.Errorf("Failed to create request: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create request"})
 		return
 	}
@@ -853,12 +906,73 @@ func (h *ProxyHandler) proxyRequest(c *gin.Context, targetURL string) {
 
 	// Send request
 	resp, err := h.client.Do(req)
+	duration := time.Since(startTime).Milliseconds()
+
 	if err != nil {
 		h.logger.Errorf("Failed to proxy request to %s: %v", url, err)
+
+		// Publish request log to message broker
+		if h.messageBroker != nil {
+			h.messageBroker.PublishRequestLog(&RequestLog{
+				Timestamp:    startTime,
+				Method:       c.Request.Method,
+				Path:         normalizedPath,
+				Service:      serviceName,
+				UserID:       userID,
+				IP:           c.ClientIP(),
+				UserAgent:    c.Request.UserAgent(),
+				Status:       502,
+				Duration:     duration,
+				RequestSize:  requestSize,
+				ResponseSize: 0,
+			})
+		}
+
 		c.JSON(http.StatusBadGateway, gin.H{"error": "failed to reach service"})
 		return
 	}
 	defer resp.Body.Close()
+
+	// Get response size
+	responseSize := resp.ContentLength
+	if responseSize < 0 {
+		responseSize = 0
+	}
+
+	// Publish request log to message broker
+	if h.messageBroker != nil {
+		h.messageBroker.PublishRequestLog(&RequestLog{
+			Timestamp:    startTime,
+			Method:       c.Request.Method,
+			Path:         normalizedPath,
+			Service:      serviceName,
+			UserID:       userID,
+			IP:           c.ClientIP(),
+			UserAgent:    c.Request.UserAgent(),
+			Status:       resp.StatusCode,
+			Duration:     duration,
+			RequestSize:  requestSize,
+			ResponseSize: responseSize,
+		})
+
+		// Publish audit log for important actions
+		if h.shouldAudit(c.Request.Method, normalizedPath) {
+			h.messageBroker.PublishAuditLog(&AuditLog{
+				Timestamp:  startTime,
+				UserID:     userID,
+				Action:     c.Request.Method,
+				Resource:   h.extractResource(normalizedPath),
+				ResourceID: h.extractResourceID(normalizedPath),
+				IP:         c.ClientIP(),
+				Metadata: map[string]interface{}{
+					"path":     normalizedPath,
+					"service":  serviceName,
+					"status":   resp.StatusCode,
+					"duration": duration,
+				},
+			})
+		}
+	}
 
 	// Copy response headers
 	for key, values := range resp.Header {
@@ -869,6 +983,114 @@ func (h *ProxyHandler) proxyRequest(c *gin.Context, targetURL string) {
 
 	// Copy response body
 	c.DataFromReader(resp.StatusCode, resp.ContentLength, resp.Header.Get("Content-Type"), resp.Body, nil)
+}
+
+// extractServiceName extracts service name from URL
+func (h *ProxyHandler) extractServiceName(url string) string {
+	serviceMap := map[string]string{
+		h.cfg.AuthServiceURL:         "auth",
+		h.cfg.UserServiceURL:         "user",
+		h.cfg.AttendanceServiceURL:   "attendance",
+		h.cfg.ScheduleServiceURL:     "schedule",
+		h.cfg.QRServiceURL:           "qr",
+		h.cfg.CourseServiceURL:       "course",
+		h.cfg.BroadcastServiceURL:    "broadcast",
+		h.cfg.NotificationServiceURL: "notification",
+		h.cfg.CalendarServiceURL:     "calendar",
+		h.cfg.LocationServiceURL:     "location",
+		h.cfg.AccessServiceURL:       "access",
+		h.cfg.QuickActionsServiceURL: "quick-actions",
+		h.cfg.FileServiceURL:         "file",
+		h.cfg.SearchServiceURL:       "search",
+		h.cfg.ReportServiceURL:       "report",
+		h.cfg.MasterDataServiceURL:   "master-data",
+		h.cfg.LeaveServiceURL:        "leave",
+	}
+
+	if service, ok := serviceMap[url]; ok {
+		return service
+	}
+	return "unknown"
+}
+
+// shouldAudit determines if a request should be audited
+func (h *ProxyHandler) shouldAudit(method, path string) bool {
+	// Audit POST, PUT, DELETE operations
+	if method == "POST" || method == "PUT" || method == "DELETE" {
+		return true
+	}
+
+	// Audit sensitive GET operations
+	sensitivePaths := []string{
+		"/profile",
+		"/permissions",
+		"/quota",
+		"/transcript",
+		"/krs",
+	}
+
+	for _, sensitivePath := range sensitivePaths {
+		if contains(path, sensitivePath) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// extractResource extracts resource name from path
+func (h *ProxyHandler) extractResource(path string) string {
+	// Extract from /api/v1/resource/... pattern
+	parts := splitPath(path)
+	if len(parts) >= 3 {
+		return parts[2]
+	}
+	return "unknown"
+}
+
+// extractResourceID extracts resource ID from path
+func (h *ProxyHandler) extractResourceID(path string) string {
+	parts := splitPath(path)
+	if len(parts) >= 4 {
+		return parts[3]
+	}
+	return ""
+}
+
+// Helper functions
+func splitPath(path string) []string {
+	var parts []string
+	current := ""
+	for _, char := range path {
+		if char == '/' {
+			if current != "" {
+				parts = append(parts, current)
+				current = ""
+			}
+		} else {
+			current += string(char)
+		}
+	}
+	if current != "" {
+		parts = append(parts, current)
+	}
+	return parts
+}
+
+func contains(s, substr string) bool {
+	return len(s) >= len(substr) && (s == substr ||
+		(len(s) > len(substr) && (s[:len(substr)] == substr ||
+			s[len(s)-len(substr):] == substr ||
+			findSubstring(s, substr))))
+}
+
+func findSubstring(s, substr string) bool {
+	for i := 0; i <= len(s)-len(substr); i++ {
+		if s[i:i+len(substr)] == substr {
+			return true
+		}
+	}
+	return false
 }
 
 func KeepImports() {
