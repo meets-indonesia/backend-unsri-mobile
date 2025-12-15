@@ -8,9 +8,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"unsri-backend/internal/file-storage/repository"
 	apperrors "unsri-backend/internal/shared/errors"
 	"unsri-backend/internal/shared/models"
-	"unsri-backend/internal/file-storage/repository"
+
 	"github.com/google/uuid"
 )
 
@@ -53,7 +54,7 @@ func (s *FileStorageService) UploadFile(ctx context.Context, userID string, req 
 	// Generate unique filename
 	ext := filepath.Ext(req.File.Filename)
 	fileName := fmt.Sprintf("%s%s", uuid.New().String(), ext)
-	
+
 	// Create directory if not exists
 	fileDir := filepath.Join(s.config.BasePath, req.FileType)
 	if err := os.MkdirAll(fileDir, 0755); err != nil {
@@ -92,7 +93,7 @@ func (s *FileStorageService) UploadFile(ctx context.Context, userID string, req 
 	}
 
 	if err := s.repo.CreateFile(ctx, file); err != nil {
-		os.Remove(filePath) // Cleanup on error
+		_ = os.Remove(filePath) // Cleanup on error
 		return nil, apperrors.NewInternalError("failed to create file record", err)
 	}
 
@@ -161,8 +162,8 @@ func (s *FileStorageService) UploadAvatar(ctx context.Context, userID string, re
 	// Delete old avatar
 	oldAvatar, _ := s.repo.GetAvatarByUserID(ctx, userID)
 	if oldAvatar != nil {
-		os.Remove(oldAvatar.Path)
-		s.repo.DeleteFile(ctx, oldAvatar.ID)
+		_ = os.Remove(oldAvatar.Path)
+		_ = s.repo.DeleteFile(ctx, oldAvatar.ID)
 	}
 
 	uploadReq := UploadFileRequest{
@@ -205,4 +206,3 @@ func (s *FileStorageService) GetFileContent(ctx context.Context, id string) ([]b
 
 	return content, file.MimeType, nil
 }
-

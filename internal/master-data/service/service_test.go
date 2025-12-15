@@ -686,7 +686,7 @@ func TestAcademicPeriodSemesterType(t *testing.T) {
 			}
 			// Validation happens in handler, here we just check the value
 			if req.SemesterType == invalidType && invalidType != "" {
-				// This is expected - validation happens at handler level
+				t.Logf("Tested invalid type: %s", invalidType)
 			}
 		})
 	}

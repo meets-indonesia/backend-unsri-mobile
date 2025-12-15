@@ -2,11 +2,13 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"unsri-backend/internal/broadcast/service"
 	"unsri-backend/internal/shared/logger"
 	"unsri-backend/internal/shared/utils"
+
+	"github.com/gin-gonic/gin"
 )
 
 // BroadcastHandler handles HTTP requests for broadcast
@@ -120,10 +122,14 @@ func (h *BroadcastHandler) SearchBroadcasts(c *gin.Context) {
 	perPage := 20
 
 	if p := c.Query("page"); p != "" {
-		// Parse page
+		if val, err := strconv.Atoi(p); err == nil && val > 0 {
+			page = val
+		}
 	}
 	if pp := c.Query("per_page"); pp != "" {
-		// Parse per_page
+		if val, err := strconv.Atoi(pp); err == nil && val > 0 {
+			perPage = val
+		}
 	}
 
 	result, total, err := h.service.SearchBroadcasts(c.Request.Context(), query, page, perPage)
@@ -187,4 +193,3 @@ func (h *BroadcastHandler) ScheduleBroadcast(c *gin.Context) {
 
 	utils.SuccessResponse(c, http.StatusOK, result)
 }
-

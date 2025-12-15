@@ -1,6 +1,8 @@
 package main
 
 import (
+	"unsri-backend/docs"
+
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -31,14 +33,13 @@ import (
 // This will create docs/ folder with swagger.json and swagger.yaml
 // After generating, uncomment the docs import and SwaggerInfo setup below
 func setupSwagger(router *gin.Engine) {
-	// Uncomment after running 'swag init':
-	// import "unsri-backend/docs"
-	// docs.SwaggerInfo.Title = "UNSRI Backend API"
-	// docs.SwaggerInfo.Description = "Backend API untuk aplikasi mobile UNSRI dengan arsitektur microservices"
-	// docs.SwaggerInfo.Version = "1.0"
-	// docs.SwaggerInfo.Host = "localhost:8080"
-	// docs.SwaggerInfo.BasePath = "/api/v1"
-	// docs.SwaggerInfo.Schemes = []string{"http", "https"}
+	// Programmatically set swagger info
+	docs.SwaggerInfo.Title = "UNSRI Backend API"
+	docs.SwaggerInfo.Description = "Backend API untuk aplikasi mobile UNSRI dengan arsitektur microservices"
+	docs.SwaggerInfo.Version = "1.0"
+	// docs.SwaggerInfo.Host = "localhost:8080" // Let Swagger UI infer the host
+	docs.SwaggerInfo.BasePath = "/api/v1"
+	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
 	// Swagger UI will be available at /swagger/index.html
 	// Make sure to run 'swag init' first to generate docs

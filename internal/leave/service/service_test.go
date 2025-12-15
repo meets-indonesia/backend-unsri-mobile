@@ -80,8 +80,12 @@ func TestCreateLeaveRequestRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			_, err := time.Parse("2006-01-02", tt.req.StartDate)
-			if (err != nil) != tt.wantErr && tt.req.StartDate != "invalid-date" {
-				// Only check date parsing if it's a date format issue
+			if tt.name == "invalid date format" {
+				if err == nil {
+					t.Error("expected date parse error")
+				}
+			} else if err != nil {
+				t.Errorf("unexpected date parse error: %v", err)
 			}
 			if tt.req.Reason == "" && !tt.wantErr {
 				t.Error("Reason should be required")

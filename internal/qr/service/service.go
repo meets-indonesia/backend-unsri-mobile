@@ -7,9 +7,9 @@ import (
 	"encoding/json"
 	"time"
 
+	"unsri-backend/internal/qr/repository"
 	apperrors "unsri-backend/internal/shared/errors"
 	"unsri-backend/internal/shared/models"
-	"unsri-backend/internal/qr/repository"
 	userRepo "unsri-backend/internal/user/repository"
 	"unsri-backend/pkg/qrcode"
 )
@@ -64,7 +64,7 @@ func (s *QRService) GenerateQR(ctx context.Context, createdBy string, req Genera
 		Type:       string(qrType),
 	}
 
-	qrImage, err := qrcode.GenerateQRCode(qrData)
+	_, err := qrcode.GenerateQRCode(qrData)
 	if err != nil {
 		return nil, apperrors.NewInternalError("failed to generate QR code", err)
 	}
@@ -82,7 +82,7 @@ func (s *QRService) GenerateQR(ctx context.Context, createdBy string, req Genera
 	}
 
 	qrData.SessionID = session.ID
-	qrImage, _ = qrcode.GenerateQRCode(qrData)
+	qrImage, _ := qrcode.GenerateQRCode(qrData)
 
 	return &GenerateQRResponse{
 		ID:        session.ID,
@@ -129,7 +129,12 @@ func (s *QRService) ValidateQR(ctx context.Context, req ValidateQRRequest) (*Val
 	}
 
 	var data map[string]interface{}
-	json.Unmarshal([]byte(session.QRCode), &data)
+	if err := json.Unmarshal([]byte(session.QRCode), &data); err != nil {
+		return &ValidateQRResponse{
+			Valid:   false,
+			Message: "Failed to parse session data",
+		}, nil
+	}
 
 	return &ValidateQRResponse{
 		Valid:   true,
@@ -164,7 +169,9 @@ func (s *QRService) GenerateClassQR(ctx context.Context, createdBy string, req G
 	existingSession, _ := s.repo.GetActiveSessionByScheduleID(ctx, req.ScheduleID)
 	if existingSession != nil {
 		existingSession.IsActive = false
-		s.repo.UpdateSession(ctx, existingSession)
+		if err := s.repo.UpdateSession(ctx, existingSession); err != nil {
+			return nil, apperrors.NewInternalError("failed to deactivate existing session", err)
+		}
 	}
 
 	// Create new session
@@ -206,7 +213,9 @@ func (s *QRService) RegenerateClassQR(ctx context.Context, scheduleID string, cr
 	existingSession, _ := s.repo.GetActiveSessionByScheduleID(ctx, scheduleID)
 	if existingSession != nil {
 		existingSession.IsActive = false
-		s.repo.UpdateSession(ctx, existingSession)
+		if err := s.repo.UpdateSession(ctx, existingSession); err != nil {
+			return nil, apperrors.NewInternalError("failed to deactivate existing session", err)
+		}
 	}
 
 	// Generate new QR with same schedule
@@ -345,7 +354,7 @@ func (s *QRService) ValidateAccessQR(ctx context.Context, qrToken string) (*Vali
 	userData := map[string]interface{}{
 		"user_id":   userQR.UserID,
 		"role":      string(userQR.User.Role),
-		"is_active":  userQR.User.IsActive,
+		"is_active": userQR.User.IsActive,
 	}
 
 	// Add role-specific data
@@ -444,4 +453,3 @@ func (s *QRService) ValidateGateQR(ctx context.Context, req ValidateGateQRReques
 		Message:  "Access granted",
 	}, nil
 }
-

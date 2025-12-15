@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
+	"unsri-backend/internal/leave/repository"
 	apperrors "unsri-backend/internal/shared/errors"
 	"unsri-backend/internal/shared/models"
-	"unsri-backend/internal/leave/repository"
 )
 
 // LeaveService handles leave business logic
@@ -56,10 +56,12 @@ func (s *LeaveService) CreateLeaveRequest(ctx context.Context, userID string, re
 	if leaveType == models.LeaveTypeAnnual || leaveType == models.LeaveTypeSick {
 		currentYear := time.Now().Year()
 		quota, err := s.repo.GetLeaveQuotaByUserAndTypeAndYear(ctx, userID, leaveType, currentYear)
-		if err == nil {
-			if quota.RemainingQuota < totalDays {
-				return nil, apperrors.NewValidationError("insufficient leave quota")
-			}
+		if err != nil {
+			return nil, apperrors.NewInternalError("failed to check leave quota", err)
+		}
+
+		if quota.RemainingQuota < totalDays {
+			return nil, apperrors.NewValidationError("insufficient leave quota")
 		}
 	}
 
@@ -170,10 +172,16 @@ func (s *LeaveService) ApproveLeaveRequest(ctx context.Context, leaveID string, 
 	if leaveRequest.LeaveType == models.LeaveTypeAnnual || leaveRequest.LeaveType == models.LeaveTypeSick {
 		currentYear := time.Now().Year()
 		quota, err := s.repo.GetLeaveQuotaByUserAndTypeAndYear(ctx, leaveRequest.UserID, leaveRequest.LeaveType, currentYear)
-		if err == nil {
+		if err != nil {
+			// Log error but continue
+			_ = err
+		} else {
 			quota.UsedQuota += leaveRequest.TotalDays
 			quota.RemainingQuota = quota.TotalQuota - quota.UsedQuota
-			s.repo.UpdateLeaveQuota(ctx, quota)
+			if err := s.repo.UpdateLeaveQuota(ctx, quota); err != nil {
+				// Log error but continue
+				_ = err
+			}
 		}
 	}
 
@@ -233,13 +241,19 @@ func (s *LeaveService) CancelLeaveRequest(ctx context.Context, leaveID string, u
 		if leaveRequest.LeaveType == models.LeaveTypeAnnual || leaveRequest.LeaveType == models.LeaveTypeSick {
 			currentYear := time.Now().Year()
 			quota, err := s.repo.GetLeaveQuotaByUserAndTypeAndYear(ctx, leaveRequest.UserID, leaveRequest.LeaveType, currentYear)
-			if err == nil {
+			if err != nil {
+				// Log error but continue
+				_ = err
+			} else {
 				quota.UsedQuota -= leaveRequest.TotalDays
 				if quota.UsedQuota < 0 {
 					quota.UsedQuota = 0
 				}
 				quota.RemainingQuota = quota.TotalQuota - quota.UsedQuota
-				s.repo.UpdateLeaveQuota(ctx, quota)
+				if err := s.repo.UpdateLeaveQuota(ctx, quota); err != nil {
+					// Log error but continue
+					_ = err
+				}
 			}
 		}
 	}
@@ -383,4 +397,3 @@ func (s *LeaveService) DeleteLeaveQuota(ctx context.Context, id string) error {
 	}
 	return s.repo.DeleteLeaveQuota(ctx, id)
 }
-

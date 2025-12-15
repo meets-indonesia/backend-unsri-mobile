@@ -1,0 +1,7039 @@
+basePath: /api/v1
+definitions:
+  models.AcademicEvent:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: string
+      description:
+        type: string
+      end_date:
+        type: string
+      event_type:
+        description: exam, holiday, registration, etc.
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      is_all_day:
+        type: boolean
+      location:
+        type: string
+      start_date:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.AcademicPeriod:
+    properties:
+      academic_year:
+        type: string
+      code:
+        type: string
+      created_at:
+        type: string
+      end_date:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      registration_end:
+        type: string
+      registration_start:
+        type: string
+      semester_type:
+        description: GANJIL, GENAP, PENDEK
+        type: string
+      start_date:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.AccessLog:
+    properties:
+      access_type:
+        description: entry, exit
+        type: string
+      created_at:
+        type: string
+      gate_id:
+        type: string
+      id:
+        type: string
+      is_allowed:
+        type: boolean
+      qr_code_id:
+        type: string
+      reason:
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/models.User'
+        description: Relations
+      user_id:
+        type: string
+    type: object
+  models.AccessPermission:
+    properties:
+      created_at:
+        type: string
+      gate_id:
+        type: string
+      id:
+        type: string
+      is_allowed:
+        type: boolean
+      updated_at:
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/models.User'
+        description: Relations
+      user_id:
+        type: string
+      valid_from:
+        type: string
+      valid_until:
+        type: string
+    type: object
+  models.Attendance:
+    properties:
+      check_in_time:
+        description: For tap in
+        type: string
+      check_out_time:
+        description: For tap out
+        type: string
+      created_at:
+        type: string
+      created_by:
+        description: For manual entry
+        type: string
+      date:
+        type: string
+      id:
+        type: string
+      latitude:
+        description: Location latitude
+        type: number
+      longitude:
+        description: Location longitude
+        type: number
+      notes:
+        type: string
+      schedule_id:
+        description: Optional, for class attendance
+        type: string
+      session_id:
+        description: Optional, for QR-based attendance
+        type: string
+      status:
+        $ref: '#/definitions/models.AttendanceStatus'
+      type:
+        $ref: '#/definitions/models.AttendanceType'
+      updated_at:
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/models.User'
+        description: Relations
+      user_id:
+        type: string
+    type: object
+  models.AttendanceStatus:
+    enum:
+    - hadir
+    - izin
+    - sakit
+    - alpa
+    - terlambat
+    type: string
+    x-enum-varnames:
+    - StatusHadir
+    - StatusIzin
+    - StatusSakit
+    - StatusAlpa
+    - StatusTerlambat
+  models.AttendanceType:
+    enum:
+    - kelas
+    - kampus
+    type: string
+    x-enum-comments:
+      AttendanceTypeKampus: Campus attendance (tap in/out)
+      AttendanceTypeKelas: Class attendance
+    x-enum-descriptions:
+    - Class attendance
+    - Campus attendance (tap in/out)
+    x-enum-varnames:
+    - AttendanceTypeKelas
+    - AttendanceTypeKampus
+  models.Bimbingan:
+    properties:
+      created_at:
+        type: string
+      date:
+        type: string
+      dosen:
+        $ref: '#/definitions/models.User'
+      dosen_id:
+        type: string
+      id:
+        type: string
+      notes:
+        type: string
+      student:
+        allOf:
+        - $ref: '#/definitions/models.User'
+        description: Relations
+      student_id:
+        type: string
+      topic:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Broadcast:
+    properties:
+      audiences:
+        description: Relations
+        items:
+          $ref: '#/definitions/models.BroadcastAudience'
+        type: array
+      class_id:
+        description: For class-specific broadcasts
+        type: string
+      content:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      is_published:
+        type: boolean
+      priority:
+        description: low, normal, high, urgent
+        type: string
+      published_at:
+        type: string
+      scheduled_at:
+        type: string
+      title:
+        type: string
+      type:
+        $ref: '#/definitions/models.BroadcastType'
+      updated_at:
+        type: string
+    type: object
+  models.BroadcastAudience:
+    properties:
+      broadcast_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      prodi:
+        description: All users in this prodi
+        type: string
+      role:
+        description: All users with this role
+        type: string
+      user_id:
+        description: Specific user
+        type: string
+    type: object
+  models.BroadcastType:
+    enum:
+    - general
+    - class
+    - campus
+    type: string
+    x-enum-varnames:
+    - BroadcastTypeGeneral
+    - BroadcastTypeClass
+    - BroadcastTypeCampus
+  models.Class:
+    properties:
+      academic_year:
+        type: string
+      assistant_dosen_id:
+        type: string
+      capacity:
+        type: integer
+      class_code:
+        type: string
+      class_name:
+        type: string
+      course:
+        allOf:
+        - $ref: '#/definitions/models.Course'
+        description: Relations
+      course_id:
+        type: string
+      created_at:
+        type: string
+      day_of_week:
+        type: integer
+      dosen_id:
+        type: string
+      end_time:
+        type: string
+      enrolled:
+        type: integer
+      enrollments:
+        items:
+          $ref: '#/definitions/models.Enrollment'
+        type: array
+      id:
+        type: string
+      is_active:
+        type: boolean
+      room:
+        type: string
+      semester:
+        type: string
+      start_time:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Course:
+    properties:
+      classes:
+        description: Relations
+        items:
+          $ref: '#/definitions/models.Class'
+        type: array
+      code:
+        type: string
+      created_at:
+        type: string
+      credits:
+        type: integer
+      description:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      name_en:
+        type: string
+      prodi:
+        type: string
+      semester:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.Dosen:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      nama:
+        type: string
+      nip:
+        type: string
+      prodi:
+        description: Program Studi
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  models.Enrollment:
+    properties:
+      class:
+        $ref: '#/definitions/models.Class'
+      class_id:
+        type: string
+      created_at:
+        type: string
+      enrollment_date:
+        type: string
+      grade:
+        description: A, B, C, D, E
+        type: string
+      id:
+        type: string
+      notes:
+        type: string
+      score:
+        type: number
+      status:
+        description: PENDING, APPROVED, REJECTED, COMPLETED, DROPPED, FAILED
+        type: string
+      student:
+        allOf:
+        - $ref: '#/definitions/models.User'
+        description: Relations
+      student_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.File:
+    properties:
+      created_at:
+        type: string
+      file_name:
+        type: string
+      file_type:
+        description: image, document, avatar, etc.
+        type: string
+      id:
+        type: string
+      is_public:
+        type: boolean
+      mime_type:
+        type: string
+      original_name:
+        type: string
+      path:
+        type: string
+      size:
+        description: in bytes
+        type: integer
+      updated_at:
+        type: string
+      url:
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/models.User'
+        description: Relations
+      user_id:
+        type: string
+    type: object
+  models.Geofence:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      latitude:
+        type: number
+      longitude:
+        type: number
+      name:
+        type: string
+      radius:
+        description: in meters
+        type: number
+      updated_at:
+        type: string
+    type: object
+  models.KRS:
+    properties:
+      created_at:
+        type: string
+      data:
+        description: Courses as JSON
+        type: string
+      id:
+        type: string
+      semester:
+        type: string
+      status:
+        description: draft, approved, rejected
+        type: string
+      student:
+        allOf:
+        - $ref: '#/definitions/models.User'
+        description: Relations
+      student_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.LeaveQuota:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      leave_type:
+        $ref: '#/definitions/models.LeaveType'
+      remaining_quota:
+        type: number
+      total_quota:
+        type: number
+      updated_at:
+        type: string
+      used_quota:
+        type: number
+      user:
+        allOf:
+        - $ref: '#/definitions/models.User'
+        description: Relations
+      user_id:
+        type: string
+      year:
+        type: integer
+    type: object
+  models.LeaveRequest:
+    properties:
+      approved_at:
+        type: string
+      approved_by:
+        type: string
+      approver:
+        $ref: '#/definitions/models.User'
+      attachment_url:
+        type: string
+      created_at:
+        type: string
+      end_date:
+        type: string
+      id:
+        type: string
+      leave_type:
+        $ref: '#/definitions/models.LeaveType'
+      reason:
+        type: string
+      rejection_reason:
+        type: string
+      start_date:
+        type: string
+      status:
+        $ref: '#/definitions/models.LeaveStatus'
+      total_days:
+        type: number
+      updated_at:
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/models.User'
+        description: Relations
+      user_id:
+        type: string
+    type: object
+  models.LeaveStatus:
+    enum:
+    - PENDING
+    - APPROVED
+    - REJECTED
+    - CANCELLED
+    type: string
+    x-enum-varnames:
+    - LeaveStatusPending
+    - LeaveStatusApproved
+    - LeaveStatusRejected
+    - LeaveStatusCancelled
+  models.LeaveType:
+    enum:
+    - ANNUAL_LEAVE
+    - SICK_LEAVE
+    - PERSONAL_LEAVE
+    - EMERGENCY_LEAVE
+    - UNPAID_LEAVE
+    - OTHER
+    type: string
+    x-enum-varnames:
+    - LeaveTypeAnnual
+    - LeaveTypeSick
+    - LeaveTypePersonal
+    - LeaveTypeEmergency
+    - LeaveTypeUnpaid
+    - LeaveTypeOther
+  models.LocationHistory:
+    properties:
+      created_at:
+        type: string
+      geofence_id:
+        type: string
+      id:
+        type: string
+      is_valid:
+        type: boolean
+      latitude:
+        type: number
+      longitude:
+        type: number
+      type:
+        description: tap_in, tap_out
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/models.User'
+        description: Relations
+      user_id:
+        type: string
+    type: object
+  models.Mahasiswa:
+    properties:
+      angkatan:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: string
+      nama:
+        type: string
+      nim:
+        type: string
+      prodi:
+        description: Program Studi
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  models.Notification:
+    properties:
+      created_at:
+        type: string
+      data:
+        description: Additional data as JSON
+        type: string
+      id:
+        type: string
+      is_read:
+        type: boolean
+      message:
+        type: string
+      read_at:
+        type: string
+      title:
+        type: string
+      type:
+        $ref: '#/definitions/models.NotificationType'
+      updated_at:
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/models.User'
+        description: Relations
+      user_id:
+        type: string
+    type: object
+  models.NotificationType:
+    enum:
+    - info
+    - warning
+    - error
+    - success
+    type: string
+    x-enum-varnames:
+    - NotificationTypeInfo
+    - NotificationTypeWarning
+    - NotificationTypeError
+    - NotificationTypeSuccess
+  models.Room:
+    properties:
+      building:
+        type: string
+      capacity:
+        type: integer
+      code:
+        type: string
+      created_at:
+        type: string
+      facilities:
+        type: string
+      floor:
+        type: integer
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      room_type:
+        description: classroom, lab, auditorium, etc.
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Schedule:
+    properties:
+      attendances:
+        description: Relations
+        items:
+          $ref: '#/definitions/models.Attendance'
+        type: array
+      course_code:
+        description: Temporary, until course service is ready
+        type: string
+      course_id:
+        description: For future expansion
+        type: string
+      course_name:
+        description: Temporary
+        type: string
+      created_at:
+        type: string
+      date:
+        description: Specific date for this schedule
+        type: string
+      day_of_week:
+        description: 0=Sunday, 1=Monday, etc.
+        type: integer
+      dosen_id:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      room:
+        type: string
+      start_time:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Staff:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      jabatan:
+        type: string
+      nama:
+        type: string
+      nip:
+        type: string
+      unit:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  models.StudyProgram:
+    properties:
+      accreditation:
+        type: string
+      code:
+        type: string
+      created_at:
+        type: string
+      degree_level:
+        description: S1, S2, S3, D3, etc.
+        type: string
+      faculty:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      name_en:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Transcript:
+    properties:
+      created_at:
+        type: string
+      data:
+        description: Course grades as JSON
+        type: string
+      id:
+        type: string
+      ipk:
+        type: number
+      semester:
+        type: string
+      student:
+        allOf:
+        - $ref: '#/definitions/models.User'
+        description: Relations
+      student_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      dosen:
+        $ref: '#/definitions/models.Dosen'
+      email:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      mahasiswa:
+        allOf:
+        - $ref: '#/definitions/models.Mahasiswa'
+        description: Relations
+      role:
+        $ref: '#/definitions/models.UserRole'
+      staff:
+        $ref: '#/definitions/models.Staff'
+      updated_at:
+        type: string
+    type: object
+  models.UserRole:
+    enum:
+    - mahasiswa
+    - dosen
+    - staff
+    type: string
+    x-enum-varnames:
+    - RoleMahasiswa
+    - RoleDosen
+    - RoleStaff
+  service.ApproveLeaveRequestRequest:
+    properties:
+      notes:
+        type: string
+    type: object
+  service.AttendanceReportResponse:
+    properties:
+      data: {}
+      period:
+        $ref: '#/definitions/service.Period'
+      summary: {}
+      type:
+        type: string
+    type: object
+  service.AudienceRequest:
+    properties:
+      prodi:
+        type: string
+      role:
+        type: string
+      user_id:
+        type: string
+    type: object
+  service.CreateAcademicPeriodRequest:
+    properties:
+      academic_year:
+        type: string
+      code:
+        type: string
+      end_date:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      registration_end:
+        type: string
+      registration_start:
+        type: string
+      semester_type:
+        enum:
+        - GANJIL
+        - GENAP
+        - PENDEK
+        type: string
+      start_date:
+        type: string
+    required:
+    - academic_year
+    - code
+    - end_date
+    - name
+    - semester_type
+    - start_date
+    type: object
+  service.CreateAccessPermissionRequest:
+    properties:
+      gate_id:
+        type: string
+      is_allowed:
+        type: boolean
+      user_id:
+        type: string
+      valid_from:
+        type: string
+      valid_until:
+        type: string
+    required:
+    - gate_id
+    - user_id
+    type: object
+  service.CreateBroadcastRequest:
+    properties:
+      audiences:
+        items:
+          $ref: '#/definitions/service.AudienceRequest'
+        type: array
+      class_id:
+        type: string
+      content:
+        type: string
+      expires_at:
+        type: string
+      priority:
+        type: string
+      scheduled_at:
+        type: string
+      title:
+        type: string
+      type:
+        enum:
+        - general
+        - class
+        - campus
+        type: string
+    required:
+    - content
+    - title
+    - type
+    type: object
+  service.CreateClassRequest:
+    properties:
+      academic_year:
+        type: string
+      assistant_dosen_id:
+        type: string
+      capacity:
+        type: integer
+      class_code:
+        type: string
+      class_name:
+        type: string
+      course_id:
+        type: string
+      day_of_week:
+        maximum: 6
+        minimum: 0
+        type: integer
+      dosen_id:
+        type: string
+      end_time:
+        type: string
+      room:
+        type: string
+      semester:
+        type: string
+      start_time:
+        type: string
+    required:
+    - class_code
+    - course_id
+    - day_of_week
+    - dosen_id
+    - end_time
+    - semester
+    - start_time
+    type: object
+  service.CreateCourseRequest:
+    properties:
+      code:
+        type: string
+      credits:
+        type: integer
+      description:
+        type: string
+      name:
+        type: string
+      name_en:
+        type: string
+      prodi:
+        type: string
+      semester:
+        type: integer
+    required:
+    - code
+    - credits
+    - name
+    type: object
+  service.CreateEventRequest:
+    properties:
+      description:
+        type: string
+      end_date:
+        type: string
+      event_type:
+        type: string
+      is_all_day:
+        type: boolean
+      location:
+        type: string
+      start_date:
+        type: string
+      title:
+        type: string
+    required:
+    - end_date
+    - start_date
+    - title
+    type: object
+  service.CreateGeofenceRequest:
+    properties:
+      description:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      name:
+        type: string
+      radius:
+        description: in meters
+        type: number
+    required:
+    - latitude
+    - longitude
+    - name
+    - radius
+    type: object
+  service.CreateLeaveQuotaRequest:
+    properties:
+      leave_type:
+        enum:
+        - ANNUAL_LEAVE
+        - SICK_LEAVE
+        - PERSONAL_LEAVE
+        - EMERGENCY_LEAVE
+        - UNPAID_LEAVE
+        - OTHER
+        type: string
+      total_quota:
+        type: number
+      user_id:
+        type: string
+      year:
+        type: integer
+    required:
+    - leave_type
+    - total_quota
+    - user_id
+    - year
+    type: object
+  service.CreateLeaveRequestRequest:
+    properties:
+      attachment_url:
+        type: string
+      end_date:
+        type: string
+      leave_type:
+        enum:
+        - ANNUAL_LEAVE
+        - SICK_LEAVE
+        - PERSONAL_LEAVE
+        - EMERGENCY_LEAVE
+        - UNPAID_LEAVE
+        - OTHER
+        type: string
+      reason:
+        type: string
+      start_date:
+        type: string
+    required:
+    - end_date
+    - leave_type
+    - reason
+    - start_date
+    type: object
+  service.CreateRoomRequest:
+    properties:
+      building:
+        type: string
+      capacity:
+        type: integer
+      code:
+        type: string
+      facilities:
+        type: string
+      floor:
+        type: integer
+      name:
+        type: string
+      room_type:
+        type: string
+    required:
+    - code
+    - name
+    type: object
+  service.CreateStudyProgramRequest:
+    properties:
+      accreditation:
+        type: string
+      code:
+        type: string
+      degree_level:
+        type: string
+      faculty:
+        type: string
+      name:
+        type: string
+      name_en:
+        type: string
+    required:
+    - code
+    - name
+    type: object
+  service.GlobalSearchResponse:
+    properties:
+      query:
+        type: string
+      results:
+        additionalProperties: true
+        type: object
+    type: object
+  service.LogAccessRequest:
+    properties:
+      access_type:
+        enum:
+        - entry
+        - exit
+        type: string
+      gate_id:
+        type: string
+      is_allowed:
+        type: boolean
+      qr_code_id:
+        type: string
+      reason:
+        type: string
+      user_id:
+        type: string
+    required:
+    - access_type
+    - gate_id
+    - user_id
+    type: object
+  service.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  service.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+      user:
+        $ref: '#/definitions/service.UserInfo'
+    type: object
+  service.ManualAttendanceRequest:
+    properties:
+      date:
+        type: string
+      notes:
+        type: string
+      schedule_id:
+        type: string
+      status:
+        enum:
+        - hadir
+        - izin
+        - sakit
+        - alpa
+        - terlambat
+        type: string
+      type:
+        enum:
+        - kelas
+        - kampus
+        type: string
+      user_id:
+        type: string
+    required:
+    - date
+    - status
+    - type
+    - user_id
+    type: object
+  service.Period:
+    properties:
+      end_date:
+        type: string
+      start_date:
+        type: string
+    type: object
+  service.QuickAction:
+    properties:
+      description:
+        type: string
+      icon:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      route:
+        type: string
+    type: object
+  service.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  service.RegisterDeviceTokenRequest:
+    properties:
+      platform:
+        enum:
+        - ios
+        - android
+        - web
+        type: string
+      token:
+        type: string
+    required:
+    - platform
+    - token
+    type: object
+  service.RegisterRequest:
+    properties:
+      angkatan:
+        description: For mahasiswa
+        type: integer
+      email:
+        type: string
+      jabatan:
+        description: For staff
+        type: string
+      nama:
+        type: string
+      nim:
+        description: For mahasiswa
+        type: string
+      nip:
+        description: For dosen/staff
+        type: string
+      password:
+        minLength: 8
+        type: string
+      prodi:
+        type: string
+      role:
+        allOf:
+        - $ref: '#/definitions/models.UserRole'
+        enum:
+        - mahasiswa
+        - dosen
+        - staff
+      unit:
+        description: For staff
+        type: string
+    required:
+    - email
+    - nama
+    - password
+    - role
+    type: object
+  service.ScanQRRequest:
+    properties:
+      latitude:
+        type: number
+      longitude:
+        type: number
+      qr_data:
+        type: string
+    required:
+    - qr_data
+    type: object
+  service.ScanQRResponse:
+    properties:
+      attendance_id:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  service.SendNotificationRequest:
+    properties:
+      data:
+        type: string
+      message:
+        type: string
+      title:
+        type: string
+      type:
+        enum:
+        - info
+        - warning
+        - error
+        - success
+        type: string
+      user_id:
+        type: string
+    required:
+    - message
+    - title
+    - type
+    - user_id
+    type: object
+  service.TapOutRequest:
+    properties:
+      latitude:
+        type: number
+      longitude:
+        type: number
+    required:
+    - latitude
+    - longitude
+    type: object
+  service.UpdateCourseRequest:
+    properties:
+      credits:
+        type: integer
+      description:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      name_en:
+        type: string
+      prodi:
+        type: string
+      semester:
+        type: integer
+    type: object
+  service.UpdateDosenRequest:
+    properties:
+      nama:
+        type: string
+      prodi:
+        type: string
+    type: object
+  service.UpdateMahasiswaRequest:
+    properties:
+      angkatan:
+        type: integer
+      nama:
+        type: string
+      prodi:
+        type: string
+    type: object
+  service.UpdateStaffRequest:
+    properties:
+      jabatan:
+        type: string
+      nama:
+        type: string
+      unit:
+        type: string
+    type: object
+  service.UpdateStudyProgramRequest:
+    properties:
+      accreditation:
+        type: string
+      degree_level:
+        type: string
+      faculty:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      name_en:
+        type: string
+    type: object
+  service.UpdateUserProfileRequest:
+    properties:
+      dosen:
+        $ref: '#/definitions/service.UpdateDosenRequest'
+      email:
+        type: string
+      mahasiswa:
+        $ref: '#/definitions/service.UpdateMahasiswaRequest'
+      staff:
+        $ref: '#/definitions/service.UpdateStaffRequest'
+    type: object
+  service.UserInfo:
+    properties:
+      dosen:
+        $ref: '#/definitions/models.Dosen'
+      email:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      mahasiswa:
+        $ref: '#/definitions/models.Mahasiswa'
+      role:
+        $ref: '#/definitions/models.UserRole'
+      staff:
+        $ref: '#/definitions/models.Staff'
+    type: object
+  service.ValidateGateQRRequest:
+    properties:
+      qr_data:
+        description: QR code data (JSON string from QR scan)
+        type: string
+    required:
+    - qr_data
+    type: object
+  service.ValidateGateQRResponse:
+    properties:
+      allowed:
+        type: boolean
+      message:
+        type: string
+      user_data:
+        additionalProperties: true
+        type: object
+      valid:
+        type: boolean
+    type: object
+  service.ValidateLocationRequest:
+    properties:
+      latitude:
+        type: number
+      longitude:
+        type: number
+    required:
+    - latitude
+    - longitude
+    type: object
+  unsri-backend_internal_access_service.ValidateQRRequest:
+    properties:
+      gate_id:
+        type: string
+      qr_token:
+        type: string
+    required:
+    - gate_id
+    - qr_token
+    type: object
+  unsri-backend_internal_attendance_service.GenerateQRRequest:
+    properties:
+      duration:
+        description: Duration in minutes, default 15
+        type: integer
+      schedule_id:
+        type: string
+      type:
+        enum:
+        - kelas
+        - kampus
+        type: string
+    required:
+    - type
+    type: object
+  unsri-backend_internal_location_service.TapInRequest:
+    properties:
+      latitude:
+        type: number
+      longitude:
+        type: number
+    required:
+    - latitude
+    - longitude
+    type: object
+  unsri-backend_internal_qr_service.GenerateQRRequest:
+    properties:
+      data:
+        additionalProperties: true
+        type: object
+      duration:
+        description: minutes
+        type: integer
+      type:
+        type: string
+    required:
+    - data
+    type: object
+  unsri-backend_internal_qr_service.GenerateQRResponse:
+    properties:
+      expires_at:
+        type: string
+      id:
+        type: string
+      qr_code:
+        type: string
+    type: object
+  unsri-backend_internal_qr_service.ValidateQRRequest:
+    properties:
+      qr_data:
+        type: string
+    required:
+    - qr_data
+    type: object
+  unsri-backend_internal_qr_service.ValidateQRResponse:
+    properties:
+      data:
+        additionalProperties: true
+        type: object
+      message:
+        type: string
+      valid:
+        type: boolean
+    type: object
+  unsri-backend_internal_schedule_service.CreateScheduleRequest:
+    properties:
+      course_code:
+        type: string
+      course_id:
+        type: string
+      course_name:
+        type: string
+      date:
+        type: string
+      day_of_week:
+        maximum: 6
+        minimum: 0
+        type: integer
+      dosen_id:
+        type: string
+      end_time:
+        type: string
+      room:
+        type: string
+      start_time:
+        type: string
+    required:
+    - date
+    - day_of_week
+    - dosen_id
+    - end_time
+    - start_time
+    type: object
+  unsri-backend_internal_schedule_service.UpdateScheduleRequest:
+    properties:
+      course_code:
+        type: string
+      course_name:
+        type: string
+      end_time:
+        type: string
+      is_active:
+        type: boolean
+      room:
+        type: string
+      start_time:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@unsri.ac.id
+    name: API Support
+  description: Backend API untuk aplikasi mobile UNSRI dengan arsitektur microservices
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: UNSRI Backend API
+  version: "1.0"
+paths:
+  /api/v1/academic-periods:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Get study program list
+        Create a new study program
+        Get study program details
+        Update study program
+        Get academic period list
+        Create a new academic period
+        Get active academic period
+        Get room list
+        Create a new room
+      parameters:
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateStudyProgramRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateStudyProgramRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateAcademicPeriodRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateRoomRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Room'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Room'
+      summary: Create Room
+      tags:
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Get study program list
+        Create a new study program
+        Get study program details
+        Update study program
+        Get academic period list
+        Create a new academic period
+        Get active academic period
+        Get room list
+        Create a new room
+      parameters:
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateStudyProgramRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateStudyProgramRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateAcademicPeriodRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateRoomRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Room'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Room'
+      summary: Create Room
+      tags:
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+  /api/v1/academic-periods/active:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Get study program list
+        Create a new study program
+        Get study program details
+        Update study program
+        Get academic period list
+        Create a new academic period
+        Get active academic period
+        Get room list
+        Create a new room
+      parameters:
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateStudyProgramRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateStudyProgramRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateAcademicPeriodRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateRoomRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Room'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Room'
+      summary: Create Room
+      tags:
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+  /api/v1/access/check:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Validate access QR code
+        Get access logs
+        Manually log access
+        Get user access permissions
+        Grant access permission
+        Check if user has access
+      parameters:
+      - description: QR Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_access_service.ValidateQRRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Access Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.LogAccessRequest'
+      - description: Permission Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateAccessPermissionRequest'
+      - description: Gate ID
+        in: query
+        name: gate_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AccessPermission'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AccessPermission'
+      summary: Check Access
+      tags:
+      - Access
+      - Access
+      - Access
+      - Access
+      - Access
+      - Access
+  /api/v1/access/history:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Validate access QR code
+        Get access logs
+        Manually log access
+        Get user access permissions
+        Grant access permission
+        Check if user has access
+      parameters:
+      - description: QR Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_access_service.ValidateQRRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Access Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.LogAccessRequest'
+      - description: Permission Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateAccessPermissionRequest'
+      - description: Gate ID
+        in: query
+        name: gate_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AccessPermission'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AccessPermission'
+      summary: Check Access
+      tags:
+      - Access
+      - Access
+      - Access
+      - Access
+      - Access
+      - Access
+  /api/v1/access/log:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Validate access QR code
+        Get access logs
+        Manually log access
+        Get user access permissions
+        Grant access permission
+        Check if user has access
+      parameters:
+      - description: QR Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_access_service.ValidateQRRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Access Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.LogAccessRequest'
+      - description: Permission Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateAccessPermissionRequest'
+      - description: Gate ID
+        in: query
+        name: gate_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AccessPermission'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AccessPermission'
+      summary: Check Access
+      tags:
+      - Access
+      - Access
+      - Access
+      - Access
+      - Access
+      - Access
+  /api/v1/access/permissions:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Validate access QR code
+        Get access logs
+        Manually log access
+        Get user access permissions
+        Grant access permission
+        Check if user has access
+      parameters:
+      - description: QR Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_access_service.ValidateQRRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Access Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.LogAccessRequest'
+      - description: Permission Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateAccessPermissionRequest'
+      - description: Gate ID
+        in: query
+        name: gate_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AccessPermission'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AccessPermission'
+      summary: Check Access
+      tags:
+      - Access
+      - Access
+      - Access
+      - Access
+      - Access
+      - Access
+  /api/v1/access/permissions/{userId}:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Validate access QR code
+        Get access logs
+        Manually log access
+        Get user access permissions
+        Grant access permission
+        Check if user has access
+      parameters:
+      - description: QR Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_access_service.ValidateQRRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Access Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.LogAccessRequest'
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: Permission Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateAccessPermissionRequest'
+      - description: Gate ID
+        in: query
+        name: gate_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AccessPermission'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AccessPermission'
+      summary: Check Access
+      tags:
+      - Access
+      - Access
+      - Access
+      - Access
+      - Access
+      - Access
+  /api/v1/access/qr/validate:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Validate access QR code
+        Get access logs
+        Manually log access
+        Get user access permissions
+        Grant access permission
+        Check if user has access
+      parameters:
+      - description: QR Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_access_service.ValidateQRRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Access Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.LogAccessRequest'
+      - description: Permission Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateAccessPermissionRequest'
+      - description: Gate ID
+        in: query
+        name: gate_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AccessPermission'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AccessPermission'
+      summary: Check Access
+      tags:
+      - Access
+      - Access
+      - Access
+      - Access
+      - Access
+      - Access
+  /api/v1/attendance:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Generate QR code for attendance
+        Scan QR code for attendance
+        Get attendance list
+        Create manual attendance record
+        Get attendance statistics
+      parameters:
+      - description: QR Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_attendance_service.GenerateQRRequest'
+      - description: Scan Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ScanQRRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Attendance Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ManualAttendanceRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Attendance'
+      summary: Get Statistics
+      tags:
+      - Attendance
+      - Attendance
+      - Attendance
+      - Attendance
+      - Attendance
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Generate QR code for attendance
+        Scan QR code for attendance
+        Get attendance list
+        Create manual attendance record
+        Get attendance statistics
+      parameters:
+      - description: QR Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_attendance_service.GenerateQRRequest'
+      - description: Scan Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ScanQRRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Attendance Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ManualAttendanceRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Attendance'
+      summary: Get Statistics
+      tags:
+      - Attendance
+      - Attendance
+      - Attendance
+      - Attendance
+      - Attendance
+  /api/v1/attendance/qr/generate:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Generate QR code for attendance
+        Scan QR code for attendance
+        Get attendance list
+        Create manual attendance record
+        Get attendance statistics
+      parameters:
+      - description: QR Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_attendance_service.GenerateQRRequest'
+      - description: Scan Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ScanQRRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Attendance Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ManualAttendanceRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Attendance'
+      summary: Get Statistics
+      tags:
+      - Attendance
+      - Attendance
+      - Attendance
+      - Attendance
+      - Attendance
+  /api/v1/attendance/qr/scan:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Generate QR code for attendance
+        Scan QR code for attendance
+        Get attendance list
+        Create manual attendance record
+        Get attendance statistics
+      parameters:
+      - description: QR Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_attendance_service.GenerateQRRequest'
+      - description: Scan Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ScanQRRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Attendance Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ManualAttendanceRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Attendance'
+      summary: Get Statistics
+      tags:
+      - Attendance
+      - Attendance
+      - Attendance
+      - Attendance
+      - Attendance
+  /api/v1/attendance/statistics:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Generate QR code for attendance
+        Scan QR code for attendance
+        Get attendance list
+        Create manual attendance record
+        Get attendance statistics
+      parameters:
+      - description: QR Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_attendance_service.GenerateQRRequest'
+      - description: Scan Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ScanQRRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Attendance Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ManualAttendanceRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Attendance'
+      summary: Get Statistics
+      tags:
+      - Attendance
+      - Attendance
+      - Attendance
+      - Attendance
+      - Attendance
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Authenticate a user and return tokens
+        Register a new user
+        Refresh access token using refresh token
+        Verify validity of access token
+      parameters:
+      - description: Login Credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.LoginRequest'
+      - description: Registration Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.RegisterRequest'
+      - description: Refresh Token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.RefreshTokenRequest'
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.UserInfo'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/service.UserInfo'
+      summary: Verify Token
+      tags:
+      - Auth
+      - Auth
+      - Auth
+      - Auth
+  /api/v1/auth/refresh-token:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Authenticate a user and return tokens
+        Register a new user
+        Refresh access token using refresh token
+        Verify validity of access token
+      parameters:
+      - description: Login Credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.LoginRequest'
+      - description: Registration Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.RegisterRequest'
+      - description: Refresh Token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.RefreshTokenRequest'
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.UserInfo'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/service.UserInfo'
+      summary: Verify Token
+      tags:
+      - Auth
+      - Auth
+      - Auth
+      - Auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Authenticate a user and return tokens
+        Register a new user
+        Refresh access token using refresh token
+        Verify validity of access token
+      parameters:
+      - description: Login Credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.LoginRequest'
+      - description: Registration Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.RegisterRequest'
+      - description: Refresh Token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.RefreshTokenRequest'
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.UserInfo'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/service.UserInfo'
+      summary: Verify Token
+      tags:
+      - Auth
+      - Auth
+      - Auth
+      - Auth
+  /api/v1/auth/verify-token:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Authenticate a user and return tokens
+        Register a new user
+        Refresh access token using refresh token
+        Verify validity of access token
+      parameters:
+      - description: Login Credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.LoginRequest'
+      - description: Registration Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.RegisterRequest'
+      - description: Refresh Token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.RefreshTokenRequest'
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.UserInfo'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/service.UserInfo'
+      summary: Verify Token
+      tags:
+      - Auth
+      - Auth
+      - Auth
+      - Auth
+  /api/v1/broadcasts:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new broadcast message
+        Get broadcast list
+        Get broadcast details
+        Search broadcasts by query
+        Get public/general broadcasts
+      parameters:
+      - description: Broadcast Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateBroadcastRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Query
+        in: query
+        name: q
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Broadcast'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Broadcast'
+      summary: Get General Broadcasts
+      tags:
+      - Broadcast
+      - Broadcast
+      - Broadcast
+      - Broadcast
+      - Broadcast
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new broadcast message
+        Get broadcast list
+        Get broadcast details
+        Search broadcasts by query
+        Get public/general broadcasts
+      parameters:
+      - description: Broadcast Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateBroadcastRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Query
+        in: query
+        name: q
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Broadcast'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Broadcast'
+      summary: Get General Broadcasts
+      tags:
+      - Broadcast
+      - Broadcast
+      - Broadcast
+      - Broadcast
+      - Broadcast
+  /api/v1/broadcasts/{id}:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new broadcast message
+        Get broadcast list
+        Get broadcast details
+        Search broadcasts by query
+        Get public/general broadcasts
+      parameters:
+      - description: Broadcast Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateBroadcastRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Query
+        in: query
+        name: q
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Broadcast'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Broadcast'
+      summary: Get General Broadcasts
+      tags:
+      - Broadcast
+      - Broadcast
+      - Broadcast
+      - Broadcast
+      - Broadcast
+  /api/v1/broadcasts/general:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new broadcast message
+        Get broadcast list
+        Get broadcast details
+        Search broadcasts by query
+        Get public/general broadcasts
+      parameters:
+      - description: Broadcast Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateBroadcastRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Query
+        in: query
+        name: q
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Broadcast'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Broadcast'
+      summary: Get General Broadcasts
+      tags:
+      - Broadcast
+      - Broadcast
+      - Broadcast
+      - Broadcast
+      - Broadcast
+  /api/v1/broadcasts/search:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new broadcast message
+        Get broadcast list
+        Get broadcast details
+        Search broadcasts by query
+        Get public/general broadcasts
+      parameters:
+      - description: Broadcast Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateBroadcastRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Query
+        in: query
+        name: q
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Broadcast'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Broadcast'
+      summary: Get General Broadcasts
+      tags:
+      - Broadcast
+      - Broadcast
+      - Broadcast
+      - Broadcast
+      - Broadcast
+  /api/v1/calendar/events:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create calendar event
+        Get event list
+        Get event details
+        Get upcoming events
+        Get events for specific month
+      parameters:
+      - description: Event Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateEventRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.AcademicEvent'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AcademicEvent'
+      summary: Get Events By Month
+      tags:
+      - Calendar
+      - Calendar
+      - Calendar
+      - Calendar
+      - Calendar
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create calendar event
+        Get event list
+        Get event details
+        Get upcoming events
+        Get events for specific month
+      parameters:
+      - description: Event Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateEventRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.AcademicEvent'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AcademicEvent'
+      summary: Get Events By Month
+      tags:
+      - Calendar
+      - Calendar
+      - Calendar
+      - Calendar
+      - Calendar
+  /api/v1/calendar/events/{id}:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create calendar event
+        Get event list
+        Get event details
+        Get upcoming events
+        Get events for specific month
+      parameters:
+      - description: Event Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateEventRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.AcademicEvent'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AcademicEvent'
+      summary: Get Events By Month
+      tags:
+      - Calendar
+      - Calendar
+      - Calendar
+      - Calendar
+      - Calendar
+  /api/v1/calendar/events/month/{year}/{month}:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create calendar event
+        Get event list
+        Get event details
+        Get upcoming events
+        Get events for specific month
+      parameters:
+      - description: Event Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateEventRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Year
+        in: path
+        name: year
+        required: true
+        type: integer
+      - description: Month
+        in: path
+        name: month
+        required: true
+        type: integer
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.AcademicEvent'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AcademicEvent'
+      summary: Get Events By Month
+      tags:
+      - Calendar
+      - Calendar
+      - Calendar
+      - Calendar
+      - Calendar
+  /api/v1/calendar/events/upcoming:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create calendar event
+        Get event list
+        Get event details
+        Get upcoming events
+        Get events for specific month
+      parameters:
+      - description: Event Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateEventRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.AcademicEvent'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AcademicEvent'
+      summary: Get Events By Month
+      tags:
+      - Calendar
+      - Calendar
+      - Calendar
+      - Calendar
+      - Calendar
+  /api/v1/courses:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new course
+        Get course list
+        Get course details
+        Update course
+        Create a new class
+      parameters:
+      - description: Course Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateCourseRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateCourseRequest'
+      - description: Class Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateClassRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Course'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Class'
+      summary: Create Class
+      tags:
+      - Course
+      - Course
+      - Course
+      - Course
+      - Course
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new course
+        Get course list
+        Get course details
+        Update course
+        Create a new class
+      parameters:
+      - description: Course Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateCourseRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateCourseRequest'
+      - description: Class Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateClassRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Course'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Class'
+      summary: Create Class
+      tags:
+      - Course
+      - Course
+      - Course
+      - Course
+      - Course
+  /api/v1/courses/{id}:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new course
+        Get course list
+        Get course details
+        Update course
+        Create a new class
+      parameters:
+      - description: Course Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateCourseRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateCourseRequest'
+      - description: Class Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateClassRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Course'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Class'
+      summary: Create Class
+      tags:
+      - Course
+      - Course
+      - Course
+      - Course
+      - Course
+    put:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new course
+        Get course list
+        Get course details
+        Update course
+        Create a new class
+      parameters:
+      - description: Course Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateCourseRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateCourseRequest'
+      - description: Class Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateClassRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Course'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Class'
+      summary: Create Class
+      tags:
+      - Course
+      - Course
+      - Course
+      - Course
+      - Course
+  /api/v1/courses/classes:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new course
+        Get course list
+        Get course details
+        Update course
+        Create a new class
+      parameters:
+      - description: Course Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateCourseRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateCourseRequest'
+      - description: Class Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateClassRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Course'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Class'
+      summary: Create Class
+      tags:
+      - Course
+      - Course
+      - Course
+      - Course
+      - Course
+  /api/v1/files:
+    get:
+      consumes:
+      - multipart/form-data
+      - application/json
+      - application/json
+      - application/json
+      - multipart/form-data
+      - multipart/form-data
+      description: |-
+        Upload a file
+        Get uploaded files
+        Get file metadata
+        Download file content
+        Delete a file
+        Helper for avatar upload
+        Helper for document upload
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Type
+        in: formData
+        name: file_type
+        type: string
+      - description: Is Public
+        in: formData
+        name: is_public
+        type: boolean
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Avatar
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Document
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/octet-stream
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.File'
+      summary: Upload Document
+      tags:
+      - File
+      - File
+      - File
+      - File
+      - File
+      - File
+      - File
+  /api/v1/files/{id}:
+    delete:
+      consumes:
+      - multipart/form-data
+      - application/json
+      - application/json
+      - application/json
+      - multipart/form-data
+      - multipart/form-data
+      description: |-
+        Upload a file
+        Get uploaded files
+        Get file metadata
+        Download file content
+        Delete a file
+        Helper for avatar upload
+        Helper for document upload
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Type
+        in: formData
+        name: file_type
+        type: string
+      - description: Is Public
+        in: formData
+        name: is_public
+        type: boolean
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: File ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: File ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: File ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Avatar
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Document
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/octet-stream
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.File'
+      summary: Upload Document
+      tags:
+      - File
+      - File
+      - File
+      - File
+      - File
+      - File
+      - File
+    get:
+      consumes:
+      - multipart/form-data
+      - application/json
+      - application/json
+      - application/json
+      - multipart/form-data
+      - multipart/form-data
+      description: |-
+        Upload a file
+        Get uploaded files
+        Get file metadata
+        Download file content
+        Delete a file
+        Helper for avatar upload
+        Helper for document upload
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Type
+        in: formData
+        name: file_type
+        type: string
+      - description: Is Public
+        in: formData
+        name: is_public
+        type: boolean
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: File ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: File ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: File ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Avatar
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Document
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/octet-stream
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.File'
+      summary: Upload Document
+      tags:
+      - File
+      - File
+      - File
+      - File
+      - File
+      - File
+      - File
+  /api/v1/files/{id}/download:
+    get:
+      consumes:
+      - multipart/form-data
+      - application/json
+      - application/json
+      - application/json
+      - multipart/form-data
+      - multipart/form-data
+      description: |-
+        Upload a file
+        Get uploaded files
+        Get file metadata
+        Download file content
+        Delete a file
+        Helper for avatar upload
+        Helper for document upload
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Type
+        in: formData
+        name: file_type
+        type: string
+      - description: Is Public
+        in: formData
+        name: is_public
+        type: boolean
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: File ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: File ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: File ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Avatar
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Document
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/octet-stream
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.File'
+      summary: Upload Document
+      tags:
+      - File
+      - File
+      - File
+      - File
+      - File
+      - File
+      - File
+  /api/v1/files/avatar:
+    post:
+      consumes:
+      - multipart/form-data
+      - application/json
+      - application/json
+      - application/json
+      - multipart/form-data
+      - multipart/form-data
+      description: |-
+        Upload a file
+        Get uploaded files
+        Get file metadata
+        Download file content
+        Delete a file
+        Helper for avatar upload
+        Helper for document upload
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Type
+        in: formData
+        name: file_type
+        type: string
+      - description: Is Public
+        in: formData
+        name: is_public
+        type: boolean
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Avatar
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Document
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/octet-stream
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.File'
+      summary: Upload Document
+      tags:
+      - File
+      - File
+      - File
+      - File
+      - File
+      - File
+      - File
+  /api/v1/files/document:
+    post:
+      consumes:
+      - multipart/form-data
+      - application/json
+      - application/json
+      - application/json
+      - multipart/form-data
+      - multipart/form-data
+      description: |-
+        Upload a file
+        Get uploaded files
+        Get file metadata
+        Download file content
+        Delete a file
+        Helper for avatar upload
+        Helper for document upload
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Type
+        in: formData
+        name: file_type
+        type: string
+      - description: Is Public
+        in: formData
+        name: is_public
+        type: boolean
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Avatar
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Document
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/octet-stream
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.File'
+      summary: Upload Document
+      tags:
+      - File
+      - File
+      - File
+      - File
+      - File
+      - File
+      - File
+  /api/v1/files/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      - application/json
+      - application/json
+      - application/json
+      - multipart/form-data
+      - multipart/form-data
+      description: |-
+        Upload a file
+        Get uploaded files
+        Get file metadata
+        Download file content
+        Delete a file
+        Helper for avatar upload
+        Helper for document upload
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Type
+        in: formData
+        name: file_type
+        type: string
+      - description: Is Public
+        in: formData
+        name: is_public
+        type: boolean
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Avatar
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Document
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/octet-stream
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.File'
+      summary: Upload Document
+      tags:
+      - File
+      - File
+      - File
+      - File
+      - File
+      - File
+      - File
+  /api/v1/leave-quotas:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new leave request
+        Get leave request list
+        Get leave request details
+        Approve a leave request
+        Reject a leave request
+        Create leave quota for user
+      parameters:
+      - description: Leave Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateLeaveRequestRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Approve Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ApproveLeaveRequestRequest'
+      - description: Quota Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateLeaveQuotaRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LeaveRequest'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.LeaveQuota'
+      summary: Create Leave Quota
+      tags:
+      - Leave
+      - Leave
+      - Leave
+      - Leave
+      - Leave
+      - LeaveLimit
+  /api/v1/leave-requests:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new leave request
+        Get leave request list
+        Get leave request details
+        Approve a leave request
+        Reject a leave request
+        Create leave quota for user
+      parameters:
+      - description: Leave Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateLeaveRequestRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Approve Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ApproveLeaveRequestRequest'
+      - description: Quota Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateLeaveQuotaRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LeaveRequest'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.LeaveQuota'
+      summary: Create Leave Quota
+      tags:
+      - Leave
+      - Leave
+      - Leave
+      - Leave
+      - Leave
+      - LeaveLimit
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new leave request
+        Get leave request list
+        Get leave request details
+        Approve a leave request
+        Reject a leave request
+        Create leave quota for user
+      parameters:
+      - description: Leave Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateLeaveRequestRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Approve Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ApproveLeaveRequestRequest'
+      - description: Quota Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateLeaveQuotaRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LeaveRequest'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.LeaveQuota'
+      summary: Create Leave Quota
+      tags:
+      - Leave
+      - Leave
+      - Leave
+      - Leave
+      - Leave
+      - LeaveLimit
+  /api/v1/leave-requests/{id}:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new leave request
+        Get leave request list
+        Get leave request details
+        Approve a leave request
+        Reject a leave request
+        Create leave quota for user
+      parameters:
+      - description: Leave Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateLeaveRequestRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Approve Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ApproveLeaveRequestRequest'
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Quota Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateLeaveQuotaRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LeaveRequest'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.LeaveQuota'
+      summary: Create Leave Quota
+      tags:
+      - Leave
+      - Leave
+      - Leave
+      - Leave
+      - Leave
+      - LeaveLimit
+  /api/v1/leave-requests/{id}/approve:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new leave request
+        Get leave request list
+        Get leave request details
+        Approve a leave request
+        Reject a leave request
+        Create leave quota for user
+      parameters:
+      - description: Leave Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateLeaveRequestRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Approve Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ApproveLeaveRequestRequest'
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Quota Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateLeaveQuotaRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LeaveRequest'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.LeaveQuota'
+      summary: Create Leave Quota
+      tags:
+      - Leave
+      - Leave
+      - Leave
+      - Leave
+      - Leave
+      - LeaveLimit
+  /api/v1/leave-requests/{id}/reject:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new leave request
+        Get leave request list
+        Get leave request details
+        Approve a leave request
+        Reject a leave request
+        Create leave quota for user
+      parameters:
+      - description: Leave Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateLeaveRequestRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Approve Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ApproveLeaveRequestRequest'
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Quota Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateLeaveQuotaRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LeaveRequest'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.LeaveQuota'
+      summary: Create Leave Quota
+      tags:
+      - Leave
+      - Leave
+      - Leave
+      - Leave
+      - Leave
+      - LeaveLimit
+  /api/v1/location/check-in-status:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Tap in at a location
+        Tap out from a location
+        Get current check-in status
+        Get user location history
+        Validate if user is within geofence
+        Get all geofences
+        Create a new geofence
+      parameters:
+      - description: Tap In Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_location_service.TapInRequest'
+      - description: Tap Out Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.TapOutRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Location Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ValidateLocationRequest'
+      - description: Geofence Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateGeofenceRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Geofence'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Geofence'
+      summary: Create Geofence
+      tags:
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+  /api/v1/location/geofences:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Tap in at a location
+        Tap out from a location
+        Get current check-in status
+        Get user location history
+        Validate if user is within geofence
+        Get all geofences
+        Create a new geofence
+      parameters:
+      - description: Tap In Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_location_service.TapInRequest'
+      - description: Tap Out Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.TapOutRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Location Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ValidateLocationRequest'
+      - description: Geofence Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateGeofenceRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Geofence'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Geofence'
+      summary: Create Geofence
+      tags:
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Tap in at a location
+        Tap out from a location
+        Get current check-in status
+        Get user location history
+        Validate if user is within geofence
+        Get all geofences
+        Create a new geofence
+      parameters:
+      - description: Tap In Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_location_service.TapInRequest'
+      - description: Tap Out Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.TapOutRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Location Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ValidateLocationRequest'
+      - description: Geofence Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateGeofenceRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Geofence'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Geofence'
+      summary: Create Geofence
+      tags:
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+  /api/v1/location/history:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Tap in at a location
+        Tap out from a location
+        Get current check-in status
+        Get user location history
+        Validate if user is within geofence
+        Get all geofences
+        Create a new geofence
+      parameters:
+      - description: Tap In Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_location_service.TapInRequest'
+      - description: Tap Out Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.TapOutRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Location Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ValidateLocationRequest'
+      - description: Geofence Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateGeofenceRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Geofence'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Geofence'
+      summary: Create Geofence
+      tags:
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+  /api/v1/location/tap-in:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Tap in at a location
+        Tap out from a location
+        Get current check-in status
+        Get user location history
+        Validate if user is within geofence
+        Get all geofences
+        Create a new geofence
+      parameters:
+      - description: Tap In Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_location_service.TapInRequest'
+      - description: Tap Out Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.TapOutRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Location Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ValidateLocationRequest'
+      - description: Geofence Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateGeofenceRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Geofence'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Geofence'
+      summary: Create Geofence
+      tags:
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+  /api/v1/location/tap-out:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Tap in at a location
+        Tap out from a location
+        Get current check-in status
+        Get user location history
+        Validate if user is within geofence
+        Get all geofences
+        Create a new geofence
+      parameters:
+      - description: Tap In Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_location_service.TapInRequest'
+      - description: Tap Out Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.TapOutRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Location Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ValidateLocationRequest'
+      - description: Geofence Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateGeofenceRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Geofence'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Geofence'
+      summary: Create Geofence
+      tags:
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+  /api/v1/location/validate:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Tap in at a location
+        Tap out from a location
+        Get current check-in status
+        Get user location history
+        Validate if user is within geofence
+        Get all geofences
+        Create a new geofence
+      parameters:
+      - description: Tap In Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_location_service.TapInRequest'
+      - description: Tap Out Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.TapOutRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Location Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ValidateLocationRequest'
+      - description: Geofence Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateGeofenceRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Geofence'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Geofence'
+      summary: Create Geofence
+      tags:
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+      - Location
+  /api/v1/notifications:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Send a notification manually
+        Get user notifications
+        Register FCM token for device
+        Mark notification as read
+      parameters:
+      - description: Notification Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.SendNotificationRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Device Token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.RegisterDeviceTokenRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Mark As Read
+      tags:
+      - Notification
+      - Notification
+      - Notification
+      - Notification
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Send a notification manually
+        Get user notifications
+        Register FCM token for device
+        Mark notification as read
+      parameters:
+      - description: Notification Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.SendNotificationRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Device Token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.RegisterDeviceTokenRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Mark As Read
+      tags:
+      - Notification
+      - Notification
+      - Notification
+      - Notification
+  /api/v1/notifications/{id}/read:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Send a notification manually
+        Get user notifications
+        Register FCM token for device
+        Mark notification as read
+      parameters:
+      - description: Notification Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.SendNotificationRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Device Token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.RegisterDeviceTokenRequest'
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Mark As Read
+      tags:
+      - Notification
+      - Notification
+      - Notification
+      - Notification
+  /api/v1/notifications/device-token:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Send a notification manually
+        Get user notifications
+        Register FCM token for device
+        Mark notification as read
+      parameters:
+      - description: Notification Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.SendNotificationRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Device Token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.RegisterDeviceTokenRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Mark As Read
+      tags:
+      - Notification
+      - Notification
+      - Notification
+      - Notification
+  /api/v1/qr/access/generate:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Generate general purpose QR
+        Validate general QR
+        Generate personal access QR
+        Validate QR for gate access
+      parameters:
+      - description: QR Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_qr_service.GenerateQRRequest'
+      - description: Validation Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_qr_service.ValidateQRRequest'
+      - description: Gate Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ValidateGateQRRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.ValidateGateQRResponse'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/unsri-backend_internal_qr_service.GenerateQRResponse'
+      summary: Validate Gate QR
+      tags:
+      - QR
+      - QR
+      - QR
+      - QR
+  /api/v1/qr/gate/validate:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Generate general purpose QR
+        Validate general QR
+        Generate personal access QR
+        Validate QR for gate access
+      parameters:
+      - description: QR Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_qr_service.GenerateQRRequest'
+      - description: Validation Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_qr_service.ValidateQRRequest'
+      - description: Gate Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ValidateGateQRRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.ValidateGateQRResponse'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/unsri-backend_internal_qr_service.GenerateQRResponse'
+      summary: Validate Gate QR
+      tags:
+      - QR
+      - QR
+      - QR
+      - QR
+  /api/v1/qr/generate:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Generate general purpose QR
+        Validate general QR
+        Generate personal access QR
+        Validate QR for gate access
+      parameters:
+      - description: QR Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_qr_service.GenerateQRRequest'
+      - description: Validation Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_qr_service.ValidateQRRequest'
+      - description: Gate Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ValidateGateQRRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.ValidateGateQRResponse'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/unsri-backend_internal_qr_service.GenerateQRResponse'
+      summary: Validate Gate QR
+      tags:
+      - QR
+      - QR
+      - QR
+      - QR
+  /api/v1/qr/validate:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Generate general purpose QR
+        Validate general QR
+        Generate personal access QR
+        Validate QR for gate access
+      parameters:
+      - description: QR Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_qr_service.GenerateQRRequest'
+      - description: Validation Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_qr_service.ValidateQRRequest'
+      - description: Gate Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ValidateGateQRRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.ValidateGateQRResponse'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/unsri-backend_internal_qr_service.GenerateQRResponse'
+      summary: Validate Gate QR
+      tags:
+      - QR
+      - QR
+      - QR
+      - QR
+  /api/v1/quick-actions:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Get available quick actions
+        Get student transcript
+        Get student KRS
+        Get thesis supervision data
+      parameters:
+      - description: Semester
+        in: query
+        name: semester
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Bimbingan'
+            type: array
+      summary: Get Bimbingan
+      tags:
+      - QuickActions
+      - QuickActions
+      - QuickActions
+      - QuickActions
+  /api/v1/quick-actions/bimbingan:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Get available quick actions
+        Get student transcript
+        Get student KRS
+        Get thesis supervision data
+      parameters:
+      - description: Semester
+        in: query
+        name: semester
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Bimbingan'
+            type: array
+      summary: Get Bimbingan
+      tags:
+      - QuickActions
+      - QuickActions
+      - QuickActions
+      - QuickActions
+  /api/v1/quick-actions/krs/{studentId}:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Get available quick actions
+        Get student transcript
+        Get student KRS
+        Get thesis supervision data
+      parameters:
+      - description: Student ID
+        in: path
+        name: studentId
+        required: true
+        type: string
+      - description: Student ID
+        in: path
+        name: studentId
+        required: true
+        type: string
+      - description: Semester
+        in: query
+        name: semester
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Bimbingan'
+            type: array
+      summary: Get Bimbingan
+      tags:
+      - QuickActions
+      - QuickActions
+      - QuickActions
+      - QuickActions
+  /api/v1/quick-actions/transcript/{studentId}:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Get available quick actions
+        Get student transcript
+        Get student KRS
+        Get thesis supervision data
+      parameters:
+      - description: Student ID
+        in: path
+        name: studentId
+        required: true
+        type: string
+      - description: Student ID
+        in: path
+        name: studentId
+        required: true
+        type: string
+      - description: Semester
+        in: query
+        name: semester
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Bimbingan'
+            type: array
+      summary: Get Bimbingan
+      tags:
+      - QuickActions
+      - QuickActions
+      - QuickActions
+      - QuickActions
+  /api/v1/reports/academic:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Get attendance report
+        Get academic report
+        Get course report
+        Get daily report
+      parameters:
+      - description: Start Date
+        in: query
+        name: start_date
+        type: string
+      - description: End Date
+        in: query
+        name: end_date
+        type: string
+      - description: Semester
+        in: query
+        name: semester
+        type: string
+      - description: Course ID
+        in: query
+        name: course_id
+        required: true
+        type: string
+      - description: Date
+        in: query
+        name: date
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Daily Report
+      tags:
+      - Report
+      - Report
+      - Report
+      - Report
+  /api/v1/reports/attendance:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Get attendance report
+        Get academic report
+        Get course report
+        Get daily report
+      parameters:
+      - description: Start Date
+        in: query
+        name: start_date
+        type: string
+      - description: End Date
+        in: query
+        name: end_date
+        type: string
+      - description: Semester
+        in: query
+        name: semester
+        type: string
+      - description: Course ID
+        in: query
+        name: course_id
+        required: true
+        type: string
+      - description: Date
+        in: query
+        name: date
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Daily Report
+      tags:
+      - Report
+      - Report
+      - Report
+      - Report
+  /api/v1/reports/course:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Get attendance report
+        Get academic report
+        Get course report
+        Get daily report
+      parameters:
+      - description: Start Date
+        in: query
+        name: start_date
+        type: string
+      - description: End Date
+        in: query
+        name: end_date
+        type: string
+      - description: Semester
+        in: query
+        name: semester
+        type: string
+      - description: Course ID
+        in: query
+        name: course_id
+        required: true
+        type: string
+      - description: Date
+        in: query
+        name: date
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Daily Report
+      tags:
+      - Report
+      - Report
+      - Report
+      - Report
+  /api/v1/reports/daily:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Get attendance report
+        Get academic report
+        Get course report
+        Get daily report
+      parameters:
+      - description: Start Date
+        in: query
+        name: start_date
+        type: string
+      - description: End Date
+        in: query
+        name: end_date
+        type: string
+      - description: Semester
+        in: query
+        name: semester
+        type: string
+      - description: Course ID
+        in: query
+        name: course_id
+        required: true
+        type: string
+      - description: Date
+        in: query
+        name: date
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Daily Report
+      tags:
+      - Report
+      - Report
+      - Report
+      - Report
+  /api/v1/rooms:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Get study program list
+        Create a new study program
+        Get study program details
+        Update study program
+        Get academic period list
+        Create a new academic period
+        Get active academic period
+        Get room list
+        Create a new room
+      parameters:
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateStudyProgramRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateStudyProgramRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateAcademicPeriodRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateRoomRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Room'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Room'
+      summary: Create Room
+      tags:
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Get study program list
+        Create a new study program
+        Get study program details
+        Update study program
+        Get academic period list
+        Create a new academic period
+        Get active academic period
+        Get room list
+        Create a new room
+      parameters:
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateStudyProgramRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateStudyProgramRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateAcademicPeriodRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateRoomRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Room'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Room'
+      summary: Create Room
+      tags:
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+  /api/v1/schedules:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new schedule
+        Get schedule list
+        Get schedule details
+        Update schedule
+        Delete schedule
+        Get schedules for today
+      parameters:
+      - description: Schedule Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_schedule_service.CreateScheduleRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_schedule_service.UpdateScheduleRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Schedule'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Schedule'
+      summary: Get Today's Schedules
+      tags:
+      - Schedule
+      - Schedule
+      - Schedule
+      - Schedule
+      - Schedule
+      - Schedule
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new schedule
+        Get schedule list
+        Get schedule details
+        Update schedule
+        Delete schedule
+        Get schedules for today
+      parameters:
+      - description: Schedule Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_schedule_service.CreateScheduleRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_schedule_service.UpdateScheduleRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Schedule'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Schedule'
+      summary: Get Today's Schedules
+      tags:
+      - Schedule
+      - Schedule
+      - Schedule
+      - Schedule
+      - Schedule
+      - Schedule
+  /api/v1/schedules/{id}:
+    delete:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new schedule
+        Get schedule list
+        Get schedule details
+        Update schedule
+        Delete schedule
+        Get schedules for today
+      parameters:
+      - description: Schedule Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_schedule_service.CreateScheduleRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Schedule ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_schedule_service.UpdateScheduleRequest'
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Schedule'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Schedule'
+      summary: Get Today's Schedules
+      tags:
+      - Schedule
+      - Schedule
+      - Schedule
+      - Schedule
+      - Schedule
+      - Schedule
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new schedule
+        Get schedule list
+        Get schedule details
+        Update schedule
+        Delete schedule
+        Get schedules for today
+      parameters:
+      - description: Schedule Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_schedule_service.CreateScheduleRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Schedule ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_schedule_service.UpdateScheduleRequest'
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Schedule'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Schedule'
+      summary: Get Today's Schedules
+      tags:
+      - Schedule
+      - Schedule
+      - Schedule
+      - Schedule
+      - Schedule
+      - Schedule
+    put:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new schedule
+        Get schedule list
+        Get schedule details
+        Update schedule
+        Delete schedule
+        Get schedules for today
+      parameters:
+      - description: Schedule Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_schedule_service.CreateScheduleRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Schedule ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_schedule_service.UpdateScheduleRequest'
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Schedule'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Schedule'
+      summary: Get Today's Schedules
+      tags:
+      - Schedule
+      - Schedule
+      - Schedule
+      - Schedule
+      - Schedule
+      - Schedule
+  /api/v1/schedules/today:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Create a new schedule
+        Get schedule list
+        Get schedule details
+        Update schedule
+        Delete schedule
+        Get schedules for today
+      parameters:
+      - description: Schedule Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_schedule_service.CreateScheduleRequest'
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/unsri-backend_internal_schedule_service.UpdateScheduleRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Schedule'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Schedule'
+      summary: Get Today's Schedules
+      tags:
+      - Schedule
+      - Schedule
+      - Schedule
+      - Schedule
+      - Schedule
+      - Schedule
+  /api/v1/search:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      description: |-
+        Search data with filters
+        Global search across services
+      parameters:
+      - description: Query
+        in: query
+        name: q
+        required: true
+        type: string
+      - description: Query
+        in: query
+        name: q
+        required: true
+        type: string
+      - description: Types (comma separated)
+        in: query
+        name: types
+        type: string
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.GlobalSearchResponse'
+      summary: Global Search
+      tags:
+      - Search
+      - Search
+  /api/v1/search/global:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      description: |-
+        Search data with filters
+        Global search across services
+      parameters:
+      - description: Query
+        in: query
+        name: q
+        required: true
+        type: string
+      - description: Query
+        in: query
+        name: q
+        required: true
+        type: string
+      - description: Types (comma separated)
+        in: query
+        name: types
+        type: string
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.GlobalSearchResponse'
+      summary: Global Search
+      tags:
+      - Search
+      - Search
+  /api/v1/study-programs:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Get study program list
+        Create a new study program
+        Get study program details
+        Update study program
+        Get academic period list
+        Create a new academic period
+        Get active academic period
+        Get room list
+        Create a new room
+      parameters:
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateStudyProgramRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateStudyProgramRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateAcademicPeriodRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateRoomRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Room'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Room'
+      summary: Create Room
+      tags:
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Get study program list
+        Create a new study program
+        Get study program details
+        Update study program
+        Get academic period list
+        Create a new academic period
+        Get active academic period
+        Get room list
+        Create a new room
+      parameters:
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateStudyProgramRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateStudyProgramRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateAcademicPeriodRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateRoomRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Room'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Room'
+      summary: Create Room
+      tags:
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+  /api/v1/study-programs/{id}:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Get study program list
+        Create a new study program
+        Get study program details
+        Update study program
+        Get academic period list
+        Create a new academic period
+        Get active academic period
+        Get room list
+        Create a new room
+      parameters:
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateStudyProgramRequest'
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateStudyProgramRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateAcademicPeriodRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateRoomRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Room'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Room'
+      summary: Create Room
+      tags:
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+    put:
+      consumes:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      description: |-
+        Get study program list
+        Create a new study program
+        Get study program details
+        Update study program
+        Get academic period list
+        Create a new academic period
+        Get active academic period
+        Get room list
+        Create a new room
+      parameters:
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateStudyProgramRequest'
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateStudyProgramRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateAcademicPeriodRequest'
+      - description: Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateRoomRequest'
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Room'
+            type: array
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Room'
+      summary: Create Room
+      tags:
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+      - MasterData
+  /api/v1/users/avatar:
+    post:
+      consumes:
+      - application/json
+      - application/json
+      - multipart/form-data
+      description: |-
+        Get current user's profile
+        Update current user's profile
+        Upload user avatar image
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Profile Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateUserProfileRequest'
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Avatar Image
+        in: formData
+        name: avatar
+        required: true
+        type: file
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Upload Avatar
+      tags:
+      - User
+      - User
+      - User
+  /api/v1/users/profile:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      - multipart/form-data
+      description: |-
+        Get current user's profile
+        Update current user's profile
+        Upload user avatar image
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Profile Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateUserProfileRequest'
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Avatar Image
+        in: formData
+        name: avatar
+        required: true
+        type: file
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Upload Avatar
+      tags:
+      - User
+      - User
+      - User
+    put:
+      consumes:
+      - application/json
+      - application/json
+      - multipart/form-data
+      description: |-
+        Get current user's profile
+        Update current user's profile
+        Upload user avatar image
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Profile Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateUserProfileRequest'
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Avatar Image
+        in: formData
+        name: avatar
+        required: true
+        type: file
+      produces:
+      - application/json
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Upload Avatar
+      tags:
+      - User
+      - User
+      - User
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Check if the API Gateway is running
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health Check
+      tags:
+      - health
+schemes:
+- http
+- https
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

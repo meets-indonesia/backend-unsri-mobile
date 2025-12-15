@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"time"
 
+	"unsri-backend/internal/attendance/repository"
 	apperrors "unsri-backend/internal/shared/errors"
 	"unsri-backend/internal/shared/models"
-	"unsri-backend/internal/attendance/repository"
 	"unsri-backend/pkg/jwt"
 	"unsri-backend/pkg/qrcode"
 )
@@ -85,7 +85,8 @@ func (s *AttendanceService) GenerateQRCode(ctx context.Context, userID string, r
 	// Store QR code data in session
 	qrDataJSON, _ := json.Marshal(qrData)
 	session.QRCode = string(qrDataJSON)
-	s.repo.UpdateSession(ctx, session) // Ignore error, QR code already generated
+	// Ignore error, QR code already generated
+	_ = s.repo.UpdateSession(ctx, session)
 
 	return &GenerateQRResponse{
 		SessionID: session.ID,
@@ -96,7 +97,7 @@ func (s *AttendanceService) GenerateQRCode(ctx context.Context, userID string, r
 
 // ScanQRRequest represents request to scan QR code
 type ScanQRRequest struct {
-	QRData string  `json:"qr_data" binding:"required"`
+	QRData    string   `json:"qr_data" binding:"required"`
 	Latitude  *float64 `json:"latitude,omitempty"`
 	Longitude *float64 `json:"longitude,omitempty"`
 }
@@ -140,15 +141,15 @@ func (s *AttendanceService) ScanQRCode(ctx context.Context, userID string, req S
 
 	// Create attendance record
 	attendance := &models.Attendance{
-		UserID:     userID,
-		SessionID:  &session.ID,
-		ScheduleID: session.ScheduleID,
-		Type:       session.Type,
-		Status:     models.StatusHadir,
-		Date:       date,
+		UserID:      userID,
+		SessionID:   &session.ID,
+		ScheduleID:  session.ScheduleID,
+		Type:        session.Type,
+		Status:      models.StatusHadir,
+		Date:        date,
 		CheckInTime: &date,
-		Latitude:   req.Latitude,
-		Longitude:  req.Longitude,
+		Latitude:    req.Latitude,
+		Longitude:   req.Longitude,
 	}
 
 	if err := s.repo.CreateAttendance(ctx, attendance); err != nil {
@@ -159,7 +160,8 @@ func (s *AttendanceService) ScanQRCode(ctx context.Context, userID string, req S
 	// The QR service will handle regeneration when generating new QR for the schedule
 	if session.Type == models.AttendanceTypeKelas && session.ScheduleID != nil {
 		session.IsActive = false
-		s.repo.UpdateSession(ctx, session) // Deactivate so new QR can be generated
+		// Deactivate so new QR can be generated
+		_ = s.repo.UpdateSession(ctx, session)
 	}
 
 	return &ScanQRResponse{
@@ -221,12 +223,12 @@ func (s *AttendanceService) GetAttendances(ctx context.Context, req GetAttendanc
 
 // ManualAttendanceRequest represents manual attendance entry request
 type ManualAttendanceRequest struct {
-	UserID    string `json:"user_id" binding:"required"`
+	UserID     string  `json:"user_id" binding:"required"`
 	ScheduleID *string `json:"schedule_id,omitempty"`
-	Type      string  `json:"type" binding:"required,oneof=kelas kampus"`
-	Status    string  `json:"status" binding:"required,oneof=hadir izin sakit alpa terlambat"`
-	Date      string  `json:"date" binding:"required"`
-	Notes     string  `json:"notes,omitempty"`
+	Type       string  `json:"type" binding:"required,oneof=kelas kampus"`
+	Status     string  `json:"status" binding:"required,oneof=hadir izin sakit alpa terlambat"`
+	Date       string  `json:"date" binding:"required"`
+	Notes      string  `json:"notes,omitempty"`
 }
 
 // CreateManualAttendance creates a manual attendance record
@@ -265,8 +267,8 @@ func (s *AttendanceService) CreateManualAttendance(ctx context.Context, createdB
 
 // UpdateAttendanceRequest represents request to update attendance
 type UpdateAttendanceRequest struct {
-	Status string  `json:"status" binding:"required,oneof=hadir izin sakit alpa terlambat"`
-	Notes  string  `json:"notes,omitempty"`
+	Status string `json:"status" binding:"required,oneof=hadir izin sakit alpa terlambat"`
+	Notes  string `json:"notes,omitempty"`
 }
 
 // UpdateAttendance updates an attendance record
@@ -367,10 +369,10 @@ func (s *AttendanceService) GetAttendanceOverview(ctx context.Context, userID st
 	now := time.Now()
 	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 	endOfMonth := startOfMonth.AddDate(0, 1, 0).Add(-time.Second)
-	
+
 	startStr := startOfMonth.Format("2006-01-02")
 	endStr := endOfMonth.Format("2006-01-02")
-	
+
 	stats, err := s.GetAttendanceStatistics(ctx, userID, &startStr, &endStr)
 	if err != nil {
 		return nil, apperrors.NewInternalError("failed to get statistics", err)
@@ -619,12 +621,12 @@ func (s *AttendanceService) DeleteSchedule(ctx context.Context, scheduleID strin
 
 // CreateShiftPatternRequest represents create shift pattern request
 type CreateShiftPatternRequest struct {
-	ShiftName           string `json:"shift_name" binding:"required"`
-	ShiftCode           string `json:"shift_code" binding:"required"`
-	StartTime           string `json:"start_time" binding:"required"` // HH:MM format
-	EndTime             string `json:"end_time" binding:"required"`   // HH:MM format
-	BreakDurationMinutes *int  `json:"break_duration_minutes,omitempty"`
-	IsNightShift        bool   `json:"is_night_shift,omitempty"`
+	ShiftName            string `json:"shift_name" binding:"required"`
+	ShiftCode            string `json:"shift_code" binding:"required"`
+	StartTime            string `json:"start_time" binding:"required"` // HH:MM format
+	EndTime              string `json:"end_time" binding:"required"`   // HH:MM format
+	BreakDurationMinutes *int   `json:"break_duration_minutes,omitempty"`
+	IsNightShift         bool   `json:"is_night_shift,omitempty"`
 }
 
 // CreateShiftPattern creates a new shift pattern
@@ -647,13 +649,13 @@ func (s *AttendanceService) CreateShiftPattern(ctx context.Context, req CreateSh
 	}
 
 	shift := &models.ShiftPattern{
-		ShiftName:           req.ShiftName,
-		ShiftCode:           req.ShiftCode,
-		StartTime:           startTime,
-		EndTime:             endTime,
+		ShiftName:            req.ShiftName,
+		ShiftCode:            req.ShiftCode,
+		StartTime:            startTime,
+		EndTime:              endTime,
 		BreakDurationMinutes: req.BreakDurationMinutes,
-		IsNightShift:        req.IsNightShift,
-		IsActive:            true,
+		IsNightShift:         req.IsNightShift,
+		IsActive:             true,
 	}
 
 	if err := s.repo.CreateShiftPattern(ctx, shift); err != nil {
@@ -695,12 +697,12 @@ func (s *AttendanceService) GetShiftPatterns(ctx context.Context, req GetShiftPa
 
 // UpdateShiftPatternRequest represents update shift pattern request
 type UpdateShiftPatternRequest struct {
-	ShiftName           *string `json:"shift_name,omitempty"`
-	StartTime           *string `json:"start_time,omitempty"`
-	EndTime             *string `json:"end_time,omitempty"`
-	BreakDurationMinutes *int  `json:"break_duration_minutes,omitempty"`
-	IsNightShift        *bool   `json:"is_night_shift,omitempty"`
-	IsActive            *bool   `json:"is_active,omitempty"`
+	ShiftName            *string `json:"shift_name,omitempty"`
+	StartTime            *string `json:"start_time,omitempty"`
+	EndTime              *string `json:"end_time,omitempty"`
+	BreakDurationMinutes *int    `json:"break_duration_minutes,omitempty"`
+	IsNightShift         *bool   `json:"is_night_shift,omitempty"`
+	IsActive             *bool   `json:"is_active,omitempty"`
 }
 
 // UpdateShiftPattern updates a shift pattern
@@ -755,9 +757,9 @@ func (s *AttendanceService) DeleteShiftPattern(ctx context.Context, id string) e
 
 // CreateUserShiftRequest represents create user shift request
 type CreateUserShiftRequest struct {
-	UserID        string  `json:"user_id" binding:"required"`
-	ShiftID       string  `json:"shift_id" binding:"required"`
-	EffectiveFrom string  `json:"effective_from" binding:"required"` // YYYY-MM-DD
+	UserID         string  `json:"user_id" binding:"required"`
+	ShiftID        string  `json:"shift_id" binding:"required"`
+	EffectiveFrom  string  `json:"effective_from" binding:"required"` // YYYY-MM-DD
 	EffectiveUntil *string `json:"effective_until,omitempty"`         // YYYY-MM-DD
 }
 
@@ -779,11 +781,11 @@ func (s *AttendanceService) CreateUserShift(ctx context.Context, req CreateUserS
 	}
 
 	userShift := &models.UserShift{
-		UserID:        req.UserID,
-		ShiftID:       req.ShiftID,
-		EffectiveFrom: effectiveFrom,
+		UserID:         req.UserID,
+		ShiftID:        req.ShiftID,
+		EffectiveFrom:  effectiveFrom,
 		EffectiveUntil: effectiveUntil,
-		IsActive:      true,
+		IsActive:       true,
 	}
 
 	if err := s.repo.CreateUserShift(ctx, userShift); err != nil {
@@ -809,14 +811,14 @@ func (s *AttendanceService) GetUserShiftsByUserID(ctx context.Context, userID st
 
 // CreateWorkScheduleRequest represents create work schedule request
 type CreateWorkScheduleRequest struct {
-	UserID      string  `json:"user_id" binding:"required"`
-	ScheduleDate string `json:"schedule_date" binding:"required"` // YYYY-MM-DD
-	ShiftID     *string `json:"shift_id,omitempty"`
-	StartTime   string  `json:"start_time" binding:"required"` // HH:MM
-	EndTime     string  `json:"end_time" binding:"required"`   // HH:MM
-	WorkType    string  `json:"work_type,omitempty"`
-	Location    string  `json:"location,omitempty"`
-	IsHoliday   bool    `json:"is_holiday,omitempty"`
+	UserID       string  `json:"user_id" binding:"required"`
+	ScheduleDate string  `json:"schedule_date" binding:"required"` // YYYY-MM-DD
+	ShiftID      *string `json:"shift_id,omitempty"`
+	StartTime    string  `json:"start_time" binding:"required"` // HH:MM
+	EndTime      string  `json:"end_time" binding:"required"`   // HH:MM
+	WorkType     string  `json:"work_type,omitempty"`
+	Location     string  `json:"location,omitempty"`
+	IsHoliday    bool    `json:"is_holiday,omitempty"`
 }
 
 // CreateWorkSchedule creates a new work schedule
@@ -868,11 +870,11 @@ func (s *AttendanceService) CreateWorkSchedule(ctx context.Context, req CreateWo
 
 // GetWorkSchedulesRequest represents get work schedules request
 type GetWorkSchedulesRequest struct {
-	UserID      string `form:"user_id"`
-	StartDate   string `form:"start_date"`
-	EndDate     string `form:"end_date"`
-	Page        int    `form:"page,default=1"`
-	PerPage     int    `form:"per_page,default=20"`
+	UserID    string `form:"user_id"`
+	StartDate string `form:"start_date"`
+	EndDate   string `form:"end_date"`
+	Page      int    `form:"page,default=1"`
+	PerPage   int    `form:"per_page,default=20"`
 }
 
 // GetWorkSchedules gets all work schedules
@@ -910,11 +912,11 @@ func (s *AttendanceService) GetWorkSchedules(ctx context.Context, req GetWorkSch
 
 // CheckInRequest represents check-in request
 type CheckInRequest struct {
-	ScheduleID    *string  `json:"schedule_id,omitempty"`
-	Latitude      *float64 `json:"latitude,omitempty"`
-	Longitude     *float64 `json:"longitude,omitempty"`
-	IsViaUNSRIWiFi *bool   `json:"is_via_unsri_wifi,omitempty"`
-	Notes         string   `json:"notes,omitempty"`
+	ScheduleID     *string  `json:"schedule_id,omitempty"`
+	Latitude       *float64 `json:"latitude,omitempty"`
+	Longitude      *float64 `json:"longitude,omitempty"`
+	IsViaUNSRIWiFi *bool    `json:"is_via_unsri_wifi,omitempty"`
+	Notes          string   `json:"notes,omitempty"`
 }
 
 // CheckIn performs check-in for work attendance
@@ -953,12 +955,12 @@ func (s *AttendanceService) CheckIn(ctx context.Context, userID string, req Chec
 	}
 
 	record := &models.WorkAttendanceRecord{
-		ScheduleID:      req.ScheduleID,
-		UserID:          userID,
-		AttendanceType:  "CHECK_IN",
-		RecordedAt:      now,
-		Status:          status,
-		IsViaUNSRIWiFi:  req.IsViaUNSRIWiFi,
+		ScheduleID:     req.ScheduleID,
+		UserID:         userID,
+		AttendanceType: "CHECK_IN",
+		RecordedAt:     now,
+		Status:         status,
+		IsViaUNSRIWiFi: req.IsViaUNSRIWiFi,
 		Latitude:       req.Latitude,
 		Longitude:      req.Longitude,
 		Notes:          req.Notes,
@@ -973,11 +975,11 @@ func (s *AttendanceService) CheckIn(ctx context.Context, userID string, req Chec
 
 // CheckOutRequest represents check-out request
 type CheckOutRequest struct {
-	ScheduleID    *string  `json:"schedule_id,omitempty"`
-	Latitude      *float64 `json:"latitude,omitempty"`
-	Longitude     *float64 `json:"longitude,omitempty"`
-	IsViaUNSRIWiFi *bool   `json:"is_via_unsri_wifi,omitempty"`
-	Notes         string   `json:"notes,omitempty"`
+	ScheduleID     *string  `json:"schedule_id,omitempty"`
+	Latitude       *float64 `json:"latitude,omitempty"`
+	Longitude      *float64 `json:"longitude,omitempty"`
+	IsViaUNSRIWiFi *bool    `json:"is_via_unsri_wifi,omitempty"`
+	Notes          string   `json:"notes,omitempty"`
 }
 
 // CheckOut performs check-out for work attendance
@@ -1000,8 +1002,16 @@ func (s *AttendanceService) CheckOut(ctx context.Context, userID string, req Che
 	var schedule *models.WorkSchedule
 	if req.ScheduleID != nil {
 		schedule, err = s.repo.GetWorkScheduleByID(ctx, *req.ScheduleID)
+		if err != nil {
+			// Schedule not found is acceptable, proceed with basic record
+			_ = err
+		}
 	} else if checkInRecord.ScheduleID != nil {
 		schedule, err = s.repo.GetWorkScheduleByID(ctx, *checkInRecord.ScheduleID)
+		if err != nil {
+			// Schedule not found is acceptable, proceed with basic record
+			_ = err
+		}
 	}
 
 	// Determine status
@@ -1021,9 +1031,9 @@ func (s *AttendanceService) CheckOut(ctx context.Context, userID string, req Che
 		RecordedAt:     now,
 		Status:         status,
 		IsViaUNSRIWiFi: req.IsViaUNSRIWiFi,
-		Latitude:      req.Latitude,
-		Longitude:     req.Longitude,
-		Notes:         req.Notes,
+		Latitude:       req.Latitude,
+		Longitude:      req.Longitude,
+		Notes:          req.Notes,
 	}
 
 	if err := s.repo.CreateWorkAttendanceRecord(ctx, record); err != nil {
@@ -1069,4 +1079,3 @@ func (s *AttendanceService) GetWorkAttendanceRecords(ctx context.Context, req Ge
 
 	return s.repo.GetWorkAttendanceRecordsByUserID(ctx, req.UserID, startDatePtr, endDatePtr, perPage, (page-1)*perPage)
 }
-

@@ -1,4 +1,3 @@
-# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: CI
 
 on:
@@ -11,6 +10,9 @@ env:
     GO_VERSION: "1.24"
     POSTGRES_VERSION: "15"
 
+permissions:
+  contents: read
+  packages: write
 jobs:
     test:
         name: Run Tests
@@ -158,8 +160,15 @@ jobs:
               if: github.ref == 'refs/heads/main'
               uses: docker/login-action@v3
               with:
-                  username: ${{ secrets.DOCKER_USERNAME }}
-                  password: ${{ secrets.DOCKER_PASSWORD }}
+                  registry: ghcr.io
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Set lower case owner name
+              run: |
+                echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
+              env:
+                OWNER: '${{ github.repository_owner }}'
 
             - name: Build and push Docker images
               uses: docker/build-push-action@v5
@@ -168,9 +177,9 @@ jobs:
                   file: ./deployments/docker/Dockerfile.api-gateway
                   push: ${{ github.ref == 'refs/heads/main' }}
                   tags: |
-                      ${{ secrets.DOCKER_USERNAME }}/unsri-api-gateway:latest
-                      ${{ secrets.DOCKER_USERNAME }}/unsri-api-gateway:${{ github.sha }}
-                  cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/unsri-api-gateway:latest
+                      ghcr.io/${{ env.OWNER_LC }}/unsri-api-gateway:latest
+                      ghcr.io/${{ env.OWNER_LC }}/unsri-api-gateway:${{ github.sha }}
+                  cache-from: type=registry,ref=ghcr.io/${{ env.OWNER_LC }}/unsri-api-gateway:latest
                   cache-to: type=inline
 
             - name: Build other services
@@ -198,12 +207,12 @@ jobs:
                   for service in "${SERVICES[@]}"; do
                     docker build \
                       -f deployments/docker/Dockerfile.$service \
-                      -t ${{ secrets.DOCKER_USERNAME }}/unsri-$service:latest \
-                      -t ${{ secrets.DOCKER_USERNAME }}/unsri-$service:${{ github.sha }} \
+                      -t ghcr.io/${{ env.OWNER_LC }}/unsri-$service:latest \
+                      -t ghcr.io/${{ env.OWNER_LC }}/unsri-$service:${{ github.sha }} \
                       .
                     
                     if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-                      docker push ${{ secrets.DOCKER_USERNAME }}/unsri-$service:latest
-                      docker push ${{ secrets.DOCKER_USERNAME }}/unsri-$service:${{ github.sha }}
+                      docker push ghcr.io/${{ env.OWNER_LC }}/unsri-$service:latest
+                      docker push ghcr.io/${{ env.OWNER_LC }}/unsri-$service:${{ github.sha }}
                     fi
                   done

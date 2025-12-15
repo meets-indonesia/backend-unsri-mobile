@@ -7,9 +7,9 @@ import (
 // SetupRoutes sets up all routes for API Gateway
 func SetupRoutes(router *gin.Engine, proxyHandler *ProxyHandler) {
 	// Health check
-	router.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "ok", "service": "api-gateway"})
-	})
+	// Health check
+	// Health check
+	router.GET("/health", HealthCheck)
 
 	// Auth service routes
 	auth := router.Group("/api/v1/auth")
@@ -162,3 +162,14 @@ func SetupRoutes(router *gin.Engine, proxyHandler *ProxyHandler) {
 	}
 }
 
+// HealthCheck godoc
+// @Summary Health Check
+// @Description Check if the API Gateway is running
+// @Tags health
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Router /health [get]
+func HealthCheck(c *gin.Context) {
+	c.JSON(200, gin.H{"status": "ok", "service": "api-gateway"})
+}

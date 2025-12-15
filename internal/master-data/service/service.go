@@ -206,7 +206,9 @@ func (s *MasterDataService) CreateAcademicPeriod(ctx context.Context, req Create
 			for _, period := range periods {
 				if period.IsActive {
 					period.IsActive = false
-					s.repo.UpdateAcademicPeriod(ctx, &period)
+					if err := s.repo.UpdateAcademicPeriod(ctx, &period); err != nil {
+						return nil, apperrors.NewInternalError("failed to deactivate active period", err)
+					}
 				}
 			}
 		}
@@ -343,7 +345,9 @@ func (s *MasterDataService) UpdateAcademicPeriod(ctx context.Context, id string,
 			for _, period := range periods {
 				if period.IsActive && period.ID != id {
 					period.IsActive = false
-					s.repo.UpdateAcademicPeriod(ctx, &period)
+					if err := s.repo.UpdateAcademicPeriod(ctx, &period); err != nil {
+						return nil, apperrors.NewInternalError("failed to deactivate active period", err)
+					}
 				}
 			}
 		}

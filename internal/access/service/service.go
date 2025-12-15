@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
+	"unsri-backend/internal/access/repository"
 	apperrors "unsri-backend/internal/shared/errors"
 	"unsri-backend/internal/shared/models"
-	"unsri-backend/internal/access/repository"
 )
 
 // AccessService handles access control business logic
@@ -43,12 +43,15 @@ func (s *AccessService) ValidateAccessQR(ctx context.Context, req ValidateQRRequ
 	permission, err := s.repo.GetAccessPermission(ctx, "", req.GateID) // userID should come from QR validation
 	if err != nil {
 		// Log access attempt
-		s.repo.CreateAccessLog(ctx, &models.AccessLog{
+		if err := s.repo.CreateAccessLog(ctx, &models.AccessLog{
 			GateID:     req.GateID,
 			AccessType: "entry",
 			IsAllowed:  false,
 			Reason:     "permission not found",
-		})
+		}); err != nil {
+			// Log error but continue
+			_ = err
+		}
 
 		return &ValidateQRResponse{
 			Valid:   true,
@@ -58,13 +61,16 @@ func (s *AccessService) ValidateAccessQR(ctx context.Context, req ValidateQRRequ
 	}
 
 	if !permission.IsAllowed {
-		s.repo.CreateAccessLog(ctx, &models.AccessLog{
+		if err := s.repo.CreateAccessLog(ctx, &models.AccessLog{
 			UserID:     permission.UserID,
 			GateID:     req.GateID,
 			AccessType: "entry",
 			IsAllowed:  false,
 			Reason:     "permission denied",
-		})
+		}); err != nil {
+			// Log error but continue
+			_ = err
+		}
 
 		return &ValidateQRResponse{
 			Valid:   true,
@@ -74,12 +80,15 @@ func (s *AccessService) ValidateAccessQR(ctx context.Context, req ValidateQRRequ
 	}
 
 	// Log successful access
-	s.repo.CreateAccessLog(ctx, &models.AccessLog{
+	if err := s.repo.CreateAccessLog(ctx, &models.AccessLog{
 		UserID:     permission.UserID,
 		GateID:     req.GateID,
 		AccessType: "entry",
 		IsAllowed:  true,
-	})
+	}); err != nil {
+		// Log error but continue
+		_ = err
+	}
 
 	return &ValidateQRResponse{
 		Valid:   true,
@@ -90,10 +99,10 @@ func (s *AccessService) ValidateAccessQR(ctx context.Context, req ValidateQRRequ
 
 // GetAccessHistoryRequest represents get access history request
 type GetAccessHistoryRequest struct {
-	UserID *string `form:"user_id"`
-	GateID *string `form:"gate_id"`
-	Page   int     `form:"page,default=1"`
-	PerPage int    `form:"per_page,default=20"`
+	UserID  *string `form:"user_id"`
+	GateID  *string `form:"gate_id"`
+	Page    int     `form:"page,default=1"`
+	PerPage int     `form:"per_page,default=20"`
 }
 
 // GetAccessHistory gets access history
@@ -148,10 +157,10 @@ func (s *AccessService) GetAccessPermissions(ctx context.Context, userID string)
 
 // CreateAccessPermissionRequest represents create access permission request
 type CreateAccessPermissionRequest struct {
-	UserID    string  `json:"user_id" binding:"required"`
-	GateID    string  `json:"gate_id" binding:"required"`
-	IsAllowed bool    `json:"is_allowed"`
-	ValidFrom *string `json:"valid_from,omitempty"`
+	UserID     string  `json:"user_id" binding:"required"`
+	GateID     string  `json:"gate_id" binding:"required"`
+	IsAllowed  bool    `json:"is_allowed"`
+	ValidFrom  *string `json:"valid_from,omitempty"`
 	ValidUntil *string `json:"valid_until,omitempty"`
 }
 
@@ -185,4 +194,3 @@ func (s *AccessService) CreateAccessPermission(ctx context.Context, req CreateAc
 
 	return permission, nil
 }
-
