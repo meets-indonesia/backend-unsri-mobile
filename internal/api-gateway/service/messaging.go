@@ -70,9 +70,9 @@ func (s *MessageBrokerService) Initialize() error {
 
 	// Bind queues to exchanges
 	bindings := []struct {
-		queue      string
-		key        string
-		exchange   string
+		queue    string
+		key      string
+		exchange string
 	}{
 		{"api_gateway_audit_logs", "audit.#", "audit_logs"},
 		{"api_gateway_request_logs", "request.#", "api_gateway_events"},
@@ -188,9 +188,13 @@ func (s *MessageBrokerService) StartConsumer(queue, consumerTag string, handler 
 		for msg := range msgs {
 			if err := handler(msg); err != nil {
 				s.logger.Errorf("Error processing message: %v", err)
-				msg.Nack(false, true) // Requeue on error
+				if nackErr := msg.Nack(false, true); nackErr != nil { // Requeue on error
+					s.logger.Errorf("Failed to nack message: %v", nackErr)
+				}
 			} else {
-				msg.Ack(false)
+				if ackErr := msg.Ack(false); ackErr != nil {
+					s.logger.Errorf("Failed to ack message: %v", ackErr)
+				}
 			}
 		}
 	}()
@@ -203,4 +207,3 @@ func (s *MessageBrokerService) StartConsumer(queue, consumerTag string, handler 
 func (s *MessageBrokerService) Close() error {
 	return s.client.Close()
 }
-

@@ -32,6 +32,8 @@ import (
 // Note: To generate swagger docs, run: swag init -g cmd/api-gateway/main.go
 // This will create docs/ folder with swagger.json and swagger.yaml
 // After generating, uncomment the docs import and SwaggerInfo setup below
+//
+//nolint:unused // This function is kept for future use when Swagger is enabled
 func setupSwagger(router *gin.Engine) {
 	// Programmatically set swagger info
 	docs.SwaggerInfo.Title = "UNSRI Backend API"

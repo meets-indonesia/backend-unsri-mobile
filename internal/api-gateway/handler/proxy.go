@@ -862,12 +862,8 @@ func (h *ProxyHandler) proxyRequest(c *gin.Context, targetURL string) {
 
 	// Get user ID from context if available
 	userID := c.GetString("user_id")
-	if userID == "" {
-		// Try to extract from Authorization header
-		if authHeader := c.GetHeader("Authorization"); authHeader != "" {
-			// User ID will be set by auth middleware if token is valid
-		}
-	}
+	// Note: User ID will be set by auth middleware if token is valid
+	// If not set, it means the request is not authenticated or user ID is not available
 
 	// Normalize path: use URL.Path which is already normalized by Gin
 	// Remove trailing slash except for root path to avoid redirect loops
@@ -913,7 +909,7 @@ func (h *ProxyHandler) proxyRequest(c *gin.Context, targetURL string) {
 
 		// Publish request log to message broker
 		if h.messageBroker != nil {
-			h.messageBroker.PublishRequestLog(&RequestLog{
+			if err := h.messageBroker.PublishRequestLog(&RequestLog{
 				Timestamp:    startTime,
 				Method:       c.Request.Method,
 				Path:         normalizedPath,
@@ -925,7 +921,9 @@ func (h *ProxyHandler) proxyRequest(c *gin.Context, targetURL string) {
 				Duration:     duration,
 				RequestSize:  requestSize,
 				ResponseSize: 0,
-			})
+			}); err != nil {
+				h.logger.Warnf("Failed to publish request log: %v", err)
+			}
 		}
 
 		c.JSON(http.StatusBadGateway, gin.H{"error": "failed to reach service"})
@@ -941,7 +939,7 @@ func (h *ProxyHandler) proxyRequest(c *gin.Context, targetURL string) {
 
 	// Publish request log to message broker
 	if h.messageBroker != nil {
-		h.messageBroker.PublishRequestLog(&RequestLog{
+		if err := h.messageBroker.PublishRequestLog(&RequestLog{
 			Timestamp:    startTime,
 			Method:       c.Request.Method,
 			Path:         normalizedPath,
@@ -953,11 +951,13 @@ func (h *ProxyHandler) proxyRequest(c *gin.Context, targetURL string) {
 			Duration:     duration,
 			RequestSize:  requestSize,
 			ResponseSize: responseSize,
-		})
+		}); err != nil {
+			h.logger.Warnf("Failed to publish request log: %v", err)
+		}
 
 		// Publish audit log for important actions
 		if h.shouldAudit(c.Request.Method, normalizedPath) {
-			h.messageBroker.PublishAuditLog(&AuditLog{
+			if err := h.messageBroker.PublishAuditLog(&AuditLog{
 				Timestamp:  startTime,
 				UserID:     userID,
 				Action:     c.Request.Method,
@@ -970,7 +970,9 @@ func (h *ProxyHandler) proxyRequest(c *gin.Context, targetURL string) {
 					"status":   resp.StatusCode,
 					"duration": duration,
 				},
-			})
+			}); err != nil {
+				h.logger.Warnf("Failed to publish audit log: %v", err)
+			}
 		}
 	}
 
