@@ -8,12 +8,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"unsri-backend/internal/api-gateway/config"
 	"unsri-backend/internal/api-gateway/handler"
 	"unsri-backend/internal/api-gateway/service"
 	"unsri-backend/internal/shared/logger"
 	"unsri-backend/internal/shared/messaging"
+
+	"github.com/gin-gonic/gin"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -30,7 +31,7 @@ func main() {
 	var rabbitMQClient *messaging.RabbitMQClient
 	maxRetries := 5
 	retryDelay := 2 * time.Second
-	
+
 	for i := 0; i < maxRetries; i++ {
 		var err error
 		rabbitMQClient, err = messaging.NewRabbitMQ(messaging.Config{
@@ -44,7 +45,7 @@ func main() {
 			log.Info("Connected to RabbitMQ")
 			break
 		}
-		
+
 		if i < maxRetries-1 {
 			log.Warnf("Failed to connect to RabbitMQ (attempt %d/%d): %v. Retrying in %v...", i+1, maxRetries, err, retryDelay)
 			time.Sleep(retryDelay)
@@ -90,10 +91,10 @@ func main() {
 
 	// Setup Swagger (only in development)
 	// Uncomment if swagger is needed
-	// if cfg.LogLevel == "debug" || os.Getenv("ENABLE_SWAGGER") == "true" {
-	// 	setupSwagger(router)
-	// 	log.Info("Swagger UI available at /swagger/index.html")
-	// }
+	if cfg.LogLevel == "debug" || os.Getenv("ENABLE_SWAGGER") == "true" {
+		setupSwagger(router)
+		log.Info("Swagger UI available at /swagger/index.html")
+	}
 
 	// Start server
 	srv := &http.Server{
@@ -126,4 +127,3 @@ func main() {
 
 	log.Info("Server exited")
 }
-
