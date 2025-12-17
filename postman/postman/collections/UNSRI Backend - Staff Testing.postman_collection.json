@@ -883,11 +883,64 @@
       "name": "5. User Management (Staff Only)",
       "item": [
         {
+          "name": "Get All Users",
+          "id": "e0bf7854-9f58-4d3e-86d6-f80630bae644",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "role",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "is_active",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "per_page",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Search Users",
           "event": [
             {
               "listen": "test",
               "script": {
+                "id": "587a60e0-72eb-40ec-88bd-356836871cb2",
                 "exec": [
                   "pm.test(\"Status code is 200\", function () {",
                   "    pm.response.to.have.status(200);",
@@ -899,7 +952,20 @@
                   "});"
                 ],
                 "type": "text/javascript",
-                "id": "587a60e0-72eb-40ec-88bd-356836871cb2"
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "869a86a3-3d87-4330-8e50-9f6296a1229d",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -931,6 +997,18 @@
                 {
                   "key": "role",
                   "value": "mahasiswa"
+                },
+                {
+                  "key": "page",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "per_page",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
                 }
               ]
             }
@@ -1006,6 +1084,18 @@
                 "packages": {},
                 "requests": {}
               }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "256e804c-9999-41fc-9477-e02d4648653b",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
             }
           ],
           "id": "15ccafba-8be5-491a-a72e-8268bd20d70e",
@@ -1018,7 +1108,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/users/mahasiswa/:id",
+              "raw": "{{base_url}}/api/v1/users/mahasiswa/:nim",
               "host": [
                 "{{base_url}}"
               ],
@@ -1027,12 +1117,12 @@
                 "v1",
                 "users",
                 "mahasiswa",
-                ":id"
+                ":nim"
               ],
               "variable": [
                 {
-                  "key": "id",
-                  "value": "1234567891"
+                  "key": "nim",
+                  "value": ""
                 }
               ]
             }
@@ -1045,6 +1135,7 @@
             {
               "listen": "test",
               "script": {
+                "id": "59f5230a-c752-4037-bc24-fcca354bfd06",
                 "exec": [
                   "pm.test(\"Status code is 200\", function () {",
                   "    pm.response.to.have.status(200);",
@@ -1057,7 +1148,20 @@
                   "});"
                 ],
                 "type": "text/javascript",
-                "id": "59f5230a-c752-4037-bc24-fcca354bfd06"
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "d57cdbe6-7a0d-42d6-8c3b-cd21490f852d",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -1071,7 +1175,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/users/dosen/9876543210",
+              "raw": "{{base_url}}/api/v1/users/dosen/:nip",
               "host": [
                 "{{base_url}}"
               ],
@@ -1080,7 +1184,13 @@
                 "v1",
                 "users",
                 "dosen",
-                "9876543210"
+                ":nip"
+              ],
+              "variable": [
+                {
+                  "key": "nip",
+                  "value": ""
+                }
               ]
             }
           },
@@ -1092,6 +1202,7 @@
             {
               "listen": "test",
               "script": {
+                "id": "a09f121c-8a63-4fd8-b963-eed93337f42b",
                 "exec": [
                   "pm.test(\"Status code is 200\", function () {",
                   "    pm.response.to.have.status(200);",
@@ -1104,7 +1215,20 @@
                   "});"
                 ],
                 "type": "text/javascript",
-                "id": "a09f121c-8a63-4fd8-b963-eed93337f42b"
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "ee529614-5c81-4b6c-9705-e9bf2a43b9b1",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -1118,7 +1242,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/users/staff/1111111111",
+              "raw": "{{base_url}}/api/v1/users/staff/:nip",
               "host": [
                 "{{base_url}}"
               ],
@@ -1127,7 +1251,226 @@
                 "v1",
                 "users",
                 "staff",
-                "1111111111"
+                ":nip"
+              ],
+              "variable": [
+                {
+                  "key": "nip",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create User (Mahasiswa)",
+          "id": "18a80ae6-3b48-4234-8995-7774617e60f8",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@unsri.ac.id\",\n  \"password\": \"password123\",\n  \"role\": \"mahasiswa\",\n  \"nim\": \"1234567890\",\n  \"nama\": \"Ahmad Naufal\",\n  \"prodi\": \"Teknik Informatika\",\n  \"angkatan\": 2023,\n  \"is_active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create User (Dosen/Staff)",
+          "id": "223aa753-e078-493a-b03e-2544605a4e1b",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "id": "a72fe0e5-0df7-4e18-a7a9-9681a6c1188c",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"updated@unsri.ac.id\",\n  \"is_active\": false,\n  \"mahasiswa\": {\n    \"nama\": \"Nama Updated\",\n    \"prodi\": \"Teknik Elektro\",\n    \"angkatan\": 2024\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "id": "28660f9b-2575-4b74-b09f-c48d8b7f884c",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Activate User",
+          "id": "978d6aaf-42b5-438c-8921-66a0656ab444",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/:id/activate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                ":id",
+                "activate"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate User",
+          "id": "7ff2daa4-d330-4e76-8096-7898f6ed487e",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/:id/deactivate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                ":id",
+                "deactivate"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
               ]
             }
           },
@@ -2060,20 +2403,6 @@
       "item": [
         {
           "name": "Generate QR Code",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "id": "9e33b2f4-939c-448b-a1a8-ec57eabb2d18",
-                "exec": [
-                  ""
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
           "id": "4fa4b00c-ae05-49c5-b685-2f4dd5c69569",
           "request": {
             "method": "POST",
