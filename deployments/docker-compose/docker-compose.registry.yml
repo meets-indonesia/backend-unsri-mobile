@@ -113,7 +113,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - JWT_SECRET=your-secret-key-change-in-production
-      - JWT_ACCESS_TTL=15m
+      - JWT_ACCESS_TTL=12h
       - JWT_REFRESH_TTL=7d
     depends_on:
       postgres:
@@ -484,4 +484,3 @@ volumes:
 networks:
   unsri-network:
     driver: bridge
-

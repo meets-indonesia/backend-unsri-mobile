@@ -102,8 +102,12 @@ func ErrorResponse(c *gin.Context, statusCode int, err error) {
 
 	// Handle standard errors
 	if appErr, ok = err.(*errors.AppError); !ok {
-		// Convert to AppError
-		appErr = errors.NewInternalError("Internal server error", err)
+		// Convert to AppError with original error message
+		errorMessage := "Internal server error"
+		if err != nil && err.Error() != "" {
+			errorMessage = err.Error()
+		}
+		appErr = errors.NewInternalError(errorMessage, err)
 		statusCode = http.StatusInternalServerError
 	}
 
@@ -143,12 +147,30 @@ func ErrorResponse(c *gin.Context, statusCode int, err error) {
 		}
 	}
 
+	// Build error response with details
+	errorInfo := &ErrorInfo{
+		Code:    appErr.Code,
+		Message: appErr.Message,
+	}
+
+	// Include error details when underlying error exists
+	if appErr.Err != nil {
+		details := make(map[string]interface{})
+		details["error"] = appErr.Err.Error()
+
+		// For internal errors, try to extract more specific error information
+		if appErr.Code == errors.ErrCodeInternalError {
+			if unwrappedErr := appErr.Unwrap(); unwrappedErr != nil && unwrappedErr != appErr.Err {
+				details["underlying_error"] = unwrappedErr.Error()
+			}
+		}
+
+		errorInfo.Details = details
+	}
+
 	c.JSON(statusCode, Response{
 		Success: false,
-		Error: &ErrorInfo{
-			Code:    appErr.Code,
-			Message: appErr.Message,
-		},
+		Error:   errorInfo,
 	})
 }
 

@@ -11,13 +11,14 @@ import (
 // QRData represents QR code data structure
 type QRData struct {
 	SessionID  string    `json:"session_id"`
-	ScheduleID string    `json:"schedule_id"`
-	ExpiresAt  time.Time `json:"expires_at"`
-	Type       string    `json:"type"` // "kelas", "kampus", "gate"
+	ScheduleID string    `json:"schedule_id,omitempty"` // For attendance QR only
+	ExpiresAt  time.Time `json:"expires_at,omitempty"`  // For attendance QR only
+	Type       string    `json:"type"`                  // "kelas", "kampus", "gate"
 
 	// Gate access specific fields (for UNSRI gate integration)
+	// Only these fields are included in gate QR code
 	UserID   string `json:"user_id,omitempty"`
-	QRToken  string `json:"qr_token,omitempty"`
+	QRToken  string `json:"qr_token,omitempty"` // Legacy field, kept for backward compatibility
 	UserName string `json:"user_name,omitempty"`
 	UserRole string `json:"user_role,omitempty"`
 	NIM      string `json:"nim,omitempty"`   // For mahasiswa

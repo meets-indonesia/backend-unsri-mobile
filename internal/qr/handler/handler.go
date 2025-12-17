@@ -3,10 +3,11 @@ package handler
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"unsri-backend/internal/qr/service"
 	"unsri-backend/internal/shared/logger"
 	"unsri-backend/internal/shared/utils"
+
+	"github.com/gin-gonic/gin"
 )
 
 // QRHandler handles HTTP requests for QR service
@@ -105,10 +106,11 @@ func (h *QRHandler) GenerateAccessQR(c *gin.Context) {
 }
 
 // ValidateAccessQR handles validate access QR request (for gate)
+// Uses session_id from URL parameter
 func (h *QRHandler) ValidateAccessQR(c *gin.Context) {
-	qrToken := c.Param("token")
+	sessionID := c.Param("session_id")
 
-	result, err := h.service.ValidateAccessQR(c.Request.Context(), qrToken)
+	result, err := h.service.ValidateAccessQR(c.Request.Context(), sessionID)
 	if err != nil {
 		utils.ErrorResponse(c, 0, err)
 		return
@@ -147,4 +149,3 @@ func (h *QRHandler) ValidateGateQR(c *gin.Context) {
 
 	utils.SuccessResponse(c, http.StatusOK, result)
 }
-

@@ -5,8 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"gorm.io/gorm"
 	"unsri-backend/internal/shared/models"
+
+	"gorm.io/gorm"
 )
 
 // QRRepository handles QR code data operations
@@ -123,3 +124,26 @@ func (r *QRRepository) GetUserAccessQRByTokenWithUser(ctx context.Context, token
 	return &userQR, nil
 }
 
+// GetUserAccessQRBySessionID gets user access QR by session ID with user data
+// Returns QR that is not expired (for tap-in) or active QR (for tap-out check)
+func (r *QRRepository) GetUserAccessQRBySessionID(ctx context.Context, sessionID string) (*models.UserAccessQR, error) {
+	var userQR models.UserAccessQR
+	query := r.db.WithContext(ctx).
+		Preload("User").
+		Preload("User.Mahasiswa").
+		Preload("User.Dosen").
+		Preload("User.Staff").
+		Where("session_id = ?", sessionID)
+
+	// Get active QR (not expired yet) - for tap-in
+	// Or get QR that is_active = true (for tap-out, even if expires_at is set)
+	query = query.Where("(expires_at IS NULL OR expires_at > ?) AND is_active = ?", time.Now(), true)
+
+	if err := query.First(&userQR).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("user access QR not found or expired")
+		}
+		return nil, err
+	}
+	return &userQR, nil
+}

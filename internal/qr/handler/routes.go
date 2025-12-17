@@ -1,9 +1,10 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
 	"unsri-backend/internal/qr/middleware"
 	"unsri-backend/pkg/jwt"
+
+	"github.com/gin-gonic/gin"
 )
 
 // SetupRoutes sets up all routes for QR service
@@ -31,9 +32,8 @@ func SetupRoutes(router *gin.Engine, handler *QRHandler, jwtToken *jwt.JWT) {
 		v1.POST("/class/generate", middleware.RoleMiddleware("dosen", "staff"), handler.GenerateClassQR)
 		v1.POST("/class/:scheduleId/regenerate", middleware.RoleMiddleware("dosen", "staff"), handler.RegenerateClassQR)
 
-		// Gate access QR (unique per user, doesn't change)
+		// Gate access QR (unique session_id per generation)
 		v1.GET("/access/generate", handler.GenerateAccessQR)
-		v1.GET("/access/validate/:token", handler.ValidateAccessQR)
+		v1.GET("/access/validate/:session_id", handler.ValidateAccessQR)
 	}
 }
-

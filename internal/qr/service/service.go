@@ -12,6 +12,8 @@ import (
 	"unsri-backend/internal/shared/models"
 	userRepo "unsri-backend/internal/user/repository"
 	"unsri-backend/pkg/qrcode"
+
+	"github.com/google/uuid"
 )
 
 // QRService handles QR code business logic
@@ -246,65 +248,53 @@ func (s *QRService) GenerateAccessQR(ctx context.Context, userID string) (*Gener
 		return nil, apperrors.NewBadRequestError("user is inactive")
 	}
 
-	// Check if user already has an access QR
-	userQR, err := s.repo.GetUserAccessQR(ctx, userID)
-	if err == nil && userQR != nil {
-		// User already has QR, regenerate with updated user data
-		qrData := s.buildGateQRData(userQR.QRToken, user)
-		qrImage, err := qrcode.GenerateQRCode(qrData)
-		if err != nil {
-			return nil, apperrors.NewInternalError("failed to generate QR code", err)
-		}
+	// Generate new session ID (UUID) - always create new session
+	sessionID := uuid.New().String()
 
-		return &GenerateQRResponse{
-			ID:        userQR.ID,
-			QRCode:    string(qrImage),
-			ExpiresAt: time.Now().Add(365 * 24 * time.Hour).Format(time.RFC3339),
-		}, nil
-	}
-
-	// Generate unique token for user
+	// Generate unique token for user (legacy, kept for backward compatibility)
 	tokenBytes := make([]byte, 32)
 	if _, err := rand.Read(tokenBytes); err != nil {
 		return nil, apperrors.NewInternalError("failed to generate token", err)
 	}
 	qrToken := base64.URLEncoding.EncodeToString(tokenBytes)
 
-	// Create new user access QR
-	userQR = &models.UserAccessQR{
-		UserID:   userID,
-		QRToken:  qrToken,
-		IsActive: true,
+	// Create new user access QR with new session ID
+	userQR := &models.UserAccessQR{
+		UserID:    userID,
+		SessionID: sessionID,
+		QRToken:   qrToken,
+		IsActive:  true, // Start as active (tap-in ready)
+		ExpiresAt: nil,  // Not expired yet
 	}
 
 	if err := s.repo.CreateUserAccessQR(ctx, userQR); err != nil {
 		return nil, apperrors.NewInternalError("failed to create user access QR", err)
 	}
 
-	// Generate QR code image with user data
-	qrData := s.buildGateQRData(qrToken, user)
+	// Generate QR code image with user data (only required fields)
+	qrData := s.buildGateQRData(sessionID, user)
 	qrImage, err := qrcode.GenerateQRCode(qrData)
 	if err != nil {
 		return nil, apperrors.NewInternalError("failed to generate QR code", err)
 	}
 
+	// Encode PNG bytes to base64 string
+	qrCodeBase64 := base64.StdEncoding.EncodeToString(qrImage)
+
 	return &GenerateQRResponse{
 		ID:        userQR.ID,
-		QRCode:    string(qrImage),
-		ExpiresAt: time.Now().Add(365 * 24 * time.Hour).Format(time.RFC3339),
+		QRCode:    qrCodeBase64,
+		ExpiresAt: "", // No expiration until tap-out
 	}, nil
 }
 
 // buildGateQRData builds QR data structure for gate access with user information
-func (s *QRService) buildGateQRData(qrToken string, user *models.User) qrcode.QRData {
+// Only includes: session_id, user_role, user_name, nim/nip, prodi
+func (s *QRService) buildGateQRData(sessionID string, user *models.User) qrcode.QRData {
 	qrData := qrcode.QRData{
-		SessionID:  qrToken,
-		ScheduleID: "",
-		ExpiresAt:  time.Now().Add(365 * 24 * time.Hour), // 1 year validity
-		Type:       "gate",
-		UserID:     user.ID,
-		QRToken:    qrToken,
-		UserRole:   string(user.Role),
+		SessionID: sessionID,
+		Type:      "gate",
+		UserRole:  string(user.Role),
 	}
 
 	// Add role-specific data
@@ -325,20 +315,18 @@ func (s *QRService) buildGateQRData(qrToken string, user *models.User) qrcode.QR
 	return qrData
 }
 
-// ValidateAccessQR validates a gate access QR code
-func (s *QRService) ValidateAccessQR(ctx context.Context, qrToken string) (*ValidateQRResponse, error) {
-	userQR, err := s.repo.GetUserAccessQRByTokenWithUser(ctx, qrToken)
+// ValidateAccessQR validates a gate access QR code using session_id
+// Implements tap-in/tap-out logic:
+// - First scan (tap-in/masuk): is_active = true, allow access
+// - Second scan (tap-out/keluar): is_active = false, expires_at = now, allow access
+// - After tap-out: session expired, must generate new QR
+func (s *QRService) ValidateAccessQR(ctx context.Context, sessionID string) (*ValidateQRResponse, error) {
+	// Get user access QR by session ID (only non-expired sessions)
+	userQR, err := s.repo.GetUserAccessQRBySessionID(ctx, sessionID)
 	if err != nil {
 		return &ValidateQRResponse{
 			Valid:   false,
-			Message: "Invalid QR code",
-		}, nil
-	}
-
-	if !userQR.IsActive {
-		return &ValidateQRResponse{
-			Valid:   false,
-			Message: "QR code is inactive",
+			Message: "Invalid QR code or session expired",
 		}, nil
 	}
 
@@ -352,9 +340,10 @@ func (s *QRService) ValidateAccessQR(ctx context.Context, qrToken string) (*Vali
 
 	// Build user data response
 	userData := map[string]interface{}{
-		"user_id":   userQR.UserID,
-		"role":      string(userQR.User.Role),
-		"is_active": userQR.User.IsActive,
+		"user_id":    userQR.UserID,
+		"session_id": userQR.SessionID,
+		"role":       string(userQR.User.Role),
+		"is_active":  userQR.User.IsActive,
 	}
 
 	// Add role-specific data
@@ -373,10 +362,57 @@ func (s *QRService) ValidateAccessQR(ctx context.Context, qrToken string) (*Vali
 		userData["jabatan"] = userQR.User.Staff.Jabatan
 	}
 
+	now := time.Now()
+
+	// Determine if this is tap-in (first scan) or tap-out (second scan)
+	// Use UpdatedAt to check: if UpdatedAt == CreatedAt, it's first scan (tap-in)
+	// If UpdatedAt > CreatedAt, it means already tapped in (tap-out)
+	isFirstScan := userQR.UpdatedAt.Equal(userQR.CreatedAt) || userQR.UpdatedAt.Before(userQR.CreatedAt.Add(time.Second))
+
+	if isFirstScan && userQR.IsActive && userQR.ExpiresAt == nil {
+		// First scan: tap-in (masuk) - keep active, allow access
+		// Update UpdatedAt to mark that tap-in has occurred, but keep status active
+		userData["action"] = "tap_in"
+		userData["status"] = "masuk"
+		userData["message"] = "Access granted (tap-in). Status QR aktif. Next scan will be tap-out."
+
+		// Update UpdatedAt to mark tap-in occurred (but keep is_active = true)
+		userQR.UpdatedAt = now
+		if err := s.repo.UpdateUserAccessQR(ctx, userQR); err != nil {
+			return &ValidateQRResponse{
+				Valid:   false,
+				Message: "Failed to update QR status",
+			}, nil
+		}
+	} else if !isFirstScan && userQR.IsActive && userQR.ExpiresAt == nil {
+		// Second scan: tap-out (keluar) - set inactive, expire session, allow access
+		userData["action"] = "tap_out"
+		userData["status"] = "keluar"
+		userData["message"] = "Access granted (tap-out). Session expired. Generate new QR for next entry."
+
+		// Set expired and inactive
+		userQR.IsActive = false
+		userQR.ExpiresAt = &now
+
+		// Update in database
+		if err := s.repo.UpdateUserAccessQR(ctx, userQR); err != nil {
+			return &ValidateQRResponse{
+				Valid:   false,
+				Message: "Failed to update QR status",
+			}, nil
+		}
+	} else {
+		// Invalid state
+		return &ValidateQRResponse{
+			Valid:   false,
+			Message: "Invalid QR state or already used",
+		}, nil
+	}
+
 	return &ValidateQRResponse{
 		Valid:   true,
-		Message: "QR code is valid",
 		Data:    userData,
+		Message: userData["message"].(string),
 	}, nil
 }
 
@@ -415,8 +451,16 @@ func (s *QRService) ValidateGateQR(ctx context.Context, req ValidateGateQRReques
 		}, nil
 	}
 
-	// Validate using QR token
-	validateResp, err := s.ValidateAccessQR(ctx, qrData.QRToken)
+	// Validate using session_id from QR data
+	if qrData.SessionID == "" {
+		return &ValidateGateQRResponse{
+			Valid:   false,
+			Allowed: false,
+			Message: "Session ID is required in QR code",
+		}, nil
+	}
+
+	validateResp, err := s.ValidateAccessQR(ctx, qrData.SessionID)
 	if err != nil {
 		return &ValidateGateQRResponse{
 			Valid:   false,
@@ -433,10 +477,10 @@ func (s *QRService) ValidateGateQR(ctx context.Context, req ValidateGateQRReques
 		}, nil
 	}
 
-	// Verify QR data matches database
-	if qrData.UserID != "" {
-		userData, ok := validateResp.Data["user_id"].(string)
-		if !ok || userData != qrData.UserID {
+	// Verify QR data matches database (optional validation)
+	if qrData.UserRole != "" {
+		userRole, ok := validateResp.Data["role"].(string)
+		if !ok || userRole != qrData.UserRole {
 			return &ValidateGateQRResponse{
 				Valid:   false,
 				Allowed: false,
