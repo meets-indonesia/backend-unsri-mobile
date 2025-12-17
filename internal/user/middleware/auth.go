@@ -3,10 +3,11 @@ package middleware
 import (
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"unsri-backend/internal/shared/errors"
 	"unsri-backend/internal/shared/utils"
 	"unsri-backend/pkg/jwt"
+
+	"github.com/gin-gonic/gin"
 )
 
 // AuthMiddleware validates JWT token
@@ -42,3 +43,31 @@ func AuthMiddleware(jwtToken *jwt.JWT) gin.HandlerFunc {
 	}
 }
 
+// RoleMiddleware checks if user has required role
+func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userRole, exists := c.Get("user_role")
+		if !exists {
+			utils.ErrorResponse(c, 401, errors.NewUnauthorizedError("user role not found"))
+			c.Abort()
+			return
+		}
+
+		role := userRole.(string)
+		allowed := false
+		for _, allowedRole := range allowedRoles {
+			if role == allowedRole {
+				allowed = true
+				break
+			}
+		}
+
+		if !allowed {
+			utils.ErrorResponse(c, 403, errors.NewForbiddenError("insufficient permissions"))
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}

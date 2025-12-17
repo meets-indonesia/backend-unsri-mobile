@@ -3,10 +3,11 @@ package handler
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"unsri-backend/internal/shared/logger"
 	"unsri-backend/internal/shared/utils"
 	"unsri-backend/internal/user/service"
+
+	"github.com/gin-gonic/gin"
 )
 
 // UserHandler handles HTTP requests for user management
@@ -172,3 +173,103 @@ func (h *UserHandler) UploadAvatar(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusOK, gin.H{"avatar_url": avatarURL})
 }
 
+// ListUsers handles list all users request (admin only)
+func (h *UserHandler) ListUsers(c *gin.Context) {
+	var req service.ListUsersRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		utils.ValidationErrorResponse(c, err)
+		return
+	}
+
+	users, total, err := h.service.ListUsers(c.Request.Context(), req)
+	if err != nil {
+		utils.ErrorResponse(c, 0, err)
+		return
+	}
+
+	page := req.Page
+	if page < 1 {
+		page = 1
+	}
+	perPage := req.PerPage
+	if perPage < 1 {
+		perPage = 20
+	}
+
+	utils.PaginatedResponse(c, users, page, perPage, total)
+}
+
+// AdminUpdateUser handles admin update user request
+func (h *UserHandler) AdminUpdateUser(c *gin.Context) {
+	userID := c.Param("id")
+
+	var req service.AdminUpdateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ValidationErrorResponse(c, err)
+		return
+	}
+
+	result, err := h.service.AdminUpdateUser(c.Request.Context(), userID, req)
+	if err != nil {
+		utils.ErrorResponse(c, 0, err)
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, result)
+}
+
+// DeleteUser handles delete user request (admin only)
+func (h *UserHandler) DeleteUser(c *gin.Context) {
+	userID := c.Param("id")
+
+	err := h.service.DeleteUser(c.Request.Context(), userID)
+	if err != nil {
+		utils.ErrorResponse(c, 0, err)
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, gin.H{"message": "User deleted successfully"})
+}
+
+// ActivateUser handles activate user request (admin only)
+func (h *UserHandler) ActivateUser(c *gin.Context) {
+	userID := c.Param("id")
+
+	result, err := h.service.ActivateUser(c.Request.Context(), userID)
+	if err != nil {
+		utils.ErrorResponse(c, 0, err)
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, result)
+}
+
+// DeactivateUser handles deactivate user request (admin only)
+func (h *UserHandler) DeactivateUser(c *gin.Context) {
+	userID := c.Param("id")
+
+	result, err := h.service.DeactivateUser(c.Request.Context(), userID)
+	if err != nil {
+		utils.ErrorResponse(c, 0, err)
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, result)
+}
+
+// CreateUser handles admin create user request
+func (h *UserHandler) CreateUser(c *gin.Context) {
+	var req service.CreateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ValidationErrorResponse(c, err)
+		return
+	}
+
+	result, err := h.service.CreateUser(c.Request.Context(), req)
+	if err != nil {
+		utils.ErrorResponse(c, 0, err)
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusCreated, result)
+}

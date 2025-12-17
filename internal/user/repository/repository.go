@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"gorm.io/gorm"
 	"unsri-backend/internal/shared/models"
+
+	"gorm.io/gorm"
 )
 
 // UserRepository handles user data operations
@@ -134,3 +135,114 @@ func (r *UserRepository) SearchUsers(ctx context.Context, query string, role *st
 	return users, total, nil
 }
 
+// ListUsers lists all users with pagination and filters
+func (r *UserRepository) ListUsers(ctx context.Context, role *string, isActive *bool, limit, offset int) ([]models.User, int64, error) {
+	var users []models.User
+	var total int64
+
+	dbQuery := r.db.WithContext(ctx).Model(&models.User{})
+
+	if role != nil {
+		dbQuery = dbQuery.Where("role = ?", *role)
+	}
+
+	if isActive != nil {
+		dbQuery = dbQuery.Where("is_active = ?", *isActive)
+	}
+
+	if err := dbQuery.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if err := dbQuery.
+		Preload("Mahasiswa").
+		Preload("Dosen").
+		Preload("Staff").
+		Limit(limit).
+		Offset(offset).
+		Order("created_at DESC").
+		Find(&users).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return users, total, nil
+}
+
+// DeleteUser soft deletes a user
+func (r *UserRepository) DeleteUser(ctx context.Context, id string) error {
+	result := r.db.WithContext(ctx).Delete(&models.User{}, "id = ?", id)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("user not found")
+	}
+	return nil
+}
+
+// ActivateUser activates a user
+func (r *UserRepository) ActivateUser(ctx context.Context, id string) error {
+	result := r.db.WithContext(ctx).
+		Model(&models.User{}).
+		Where("id = ?", id).
+		Update("is_active", true)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("user not found")
+	}
+	return nil
+}
+
+// DeactivateUser deactivates a user
+func (r *UserRepository) DeactivateUser(ctx context.Context, id string) error {
+	result := r.db.WithContext(ctx).
+		Model(&models.User{}).
+		Where("id = ?", id).
+		Update("is_active", false)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("user not found")
+	}
+	return nil
+}
+
+// GetDB returns the underlying GORM DB instance for transaction support
+func (r *UserRepository) GetDB() *gorm.DB {
+	return r.db
+}
+
+// CreateUser creates a new user (for admin)
+func (r *UserRepository) CreateUser(ctx context.Context, user *models.User) error {
+	return r.db.WithContext(ctx).Create(user).Error
+}
+
+// CreateMahasiswa creates a new mahasiswa
+func (r *UserRepository) CreateMahasiswa(ctx context.Context, mahasiswa *models.Mahasiswa) error {
+	return r.db.WithContext(ctx).Create(mahasiswa).Error
+}
+
+// CreateDosen creates a new dosen
+func (r *UserRepository) CreateDosen(ctx context.Context, dosen *models.Dosen) error {
+	return r.db.WithContext(ctx).Create(dosen).Error
+}
+
+// CreateStaff creates a new staff
+func (r *UserRepository) CreateStaff(ctx context.Context, staff *models.Staff) error {
+	return r.db.WithContext(ctx).Create(staff).Error
+}
+
+// FindByEmail finds a user by email
+func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*models.User, error) {
+	var user models.User
+	if err := r.db.WithContext(ctx).Where("email = ?", email).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("user not found")
+		}
+		return nil, err
+	}
+	return &user, nil
+}
