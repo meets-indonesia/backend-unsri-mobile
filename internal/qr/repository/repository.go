@@ -94,6 +94,22 @@ func (r *QRRepository) UpdateUserAccessQR(ctx context.Context, userQR *models.Us
 	return r.db.WithContext(ctx).Save(userQR).Error
 }
 
+// UpdateUserAccessQRAtomic atomically updates UpdatedAt for tap-in detection
+// Only updates if UpdatedAt is still within the time window from CreatedAt (tap-in state)
+// Returns the number of rows affected (0 if condition not met, 1 if updated)
+func (r *QRRepository) UpdateUserAccessQRAtomic(ctx context.Context, sessionID string, updateTime time.Time, timeWindow time.Duration) (int64, error) {
+	result := r.db.WithContext(ctx).
+		Model(&models.UserAccessQR{}).
+		Where("session_id = ? AND is_active = ? AND expires_at IS NULL", sessionID, true).
+		Where("EXTRACT(EPOCH FROM (updated_at - created_at)) <= ?", timeWindow.Seconds()).
+		Update("updated_at", updateTime)
+
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	return result.RowsAffected, nil
+}
+
 // GetUserAccessQRByToken gets user access QR by token
 func (r *QRRepository) GetUserAccessQRByToken(ctx context.Context, token string) (*models.UserAccessQR, error) {
 	var userQR models.UserAccessQR

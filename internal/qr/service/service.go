@@ -365,24 +365,72 @@ func (s *QRService) ValidateAccessQR(ctx context.Context, sessionID string) (*Va
 	now := time.Now()
 
 	// Determine if this is tap-in (first scan) or tap-out (second scan)
-	// Use UpdatedAt to check: if UpdatedAt == CreatedAt, it's first scan (tap-in)
-	// If UpdatedAt > CreatedAt, it means already tapped in (tap-out)
-	isFirstScan := userQR.UpdatedAt.Equal(userQR.CreatedAt) || userQR.UpdatedAt.Before(userQR.CreatedAt.Add(time.Second))
+	// Use a more robust approach: check if UpdatedAt is within a small window of CreatedAt
+	// This indicates the QR hasn't been tapped in yet (tap-in state)
+	// Use a 5-second window to account for database timestamp precision and small delays
+	timeWindow := 5 * time.Second
+	timeDiff := userQR.UpdatedAt.Sub(userQR.CreatedAt)
+	isFirstScan := timeDiff >= 0 && timeDiff <= timeWindow
 
 	if isFirstScan && userQR.IsActive && userQR.ExpiresAt == nil {
 		// First scan: tap-in (masuk) - keep active, allow access
-		// Update UpdatedAt to mark that tap-in has occurred, but keep status active
+		// Use atomic update with WHERE clause to ensure only one tap-in can succeed
+		// This prevents race conditions when multiple scans happen simultaneously
 		userData["action"] = "tap_in"
 		userData["status"] = "masuk"
 		userData["message"] = "Access granted (tap-in). Status QR aktif. Next scan will be tap-out."
 
-		// Update UpdatedAt to mark tap-in occurred (but keep is_active = true)
-		userQR.UpdatedAt = now
-		if err := s.repo.UpdateUserAccessQR(ctx, userQR); err != nil {
+		// Atomic update: only update if UpdatedAt hasn't changed significantly (still in tap-in state)
+		// This ensures only the first scan can mark as tap-in
+		updateTime := now
+		rowsAffected, err := s.repo.UpdateUserAccessQRAtomic(ctx, userQR.SessionID, updateTime, timeWindow)
+		if err != nil {
 			return &ValidateQRResponse{
 				Valid:   false,
 				Message: "Failed to update QR status",
 			}, nil
+		}
+
+		// If no rows were affected, it means another request already processed tap-in
+		// This can happen in high concurrency scenarios
+		if rowsAffected == 0 {
+			// Re-fetch to get updated state
+			updatedQR, err := s.repo.GetUserAccessQRBySessionID(ctx, userQR.SessionID)
+			if err != nil {
+				return &ValidateQRResponse{
+					Valid:   false,
+					Message: "Failed to verify QR status",
+				}, nil
+			}
+
+			// Check if it's now in tap-out state (UpdatedAt was updated by another request)
+			timeDiffAfter := updatedQR.UpdatedAt.Sub(updatedQR.CreatedAt)
+			if timeDiffAfter > timeWindow && updatedQR.IsActive && updatedQR.ExpiresAt == nil {
+				// Another request already processed tap-in, this should be tap-out
+				userData["action"] = "tap_out"
+				userData["status"] = "keluar"
+				userData["message"] = "Access granted (tap-out). Session expired. Generate new QR for next entry."
+
+				// Set expired and inactive
+				updatedQR.IsActive = false
+				updatedQR.ExpiresAt = &now
+
+				if err := s.repo.UpdateUserAccessQR(ctx, updatedQR); err != nil {
+					return &ValidateQRResponse{
+						Valid:   false,
+						Message: "Failed to update QR status",
+					}, nil
+				}
+			} else {
+				// Still in tap-in state or invalid state
+				return &ValidateQRResponse{
+					Valid:   false,
+					Message: "QR status conflict, please try again",
+				}, nil
+			}
+		} else {
+			// Successfully updated, update local object
+			userQR.UpdatedAt = updateTime
 		}
 	} else if !isFirstScan && userQR.IsActive && userQR.ExpiresAt == nil {
 		// Second scan: tap-out (keluar) - set inactive, expire session, allow access
