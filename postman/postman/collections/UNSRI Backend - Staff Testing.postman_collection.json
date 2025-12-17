@@ -1,0 +1,2949 @@
+{
+  "info": {
+    "_postman_id": "bbeba1e4-5302-4f39-92e3-90195d7cbc2d",
+    "name": "UNSRI Backend - Staff Testing",
+    "description": "Testing collection untuk role Staff dengan test scripts dan assertions lengkap - Full administrative access",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0. Gate Access",
+      "item": [
+        {
+          "name": "GET QR Code Access Gate",
+          "id": "2c57d39f-ca43-43bd-afc2-f461a7418132",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/qr/access/generate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qr",
+                "access",
+                "generate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Access Gate",
+          "id": "c6c97732-3b1e-445a-9055-fbd8879440b0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/qr/access/validate/:session_id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qr",
+                "access",
+                "validate",
+                ":session_id"
+              ],
+              "variable": [
+                {
+                  "key": "session_id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "0a7a13c9-140c-4eb4-844e-aa61909f5271"
+    },
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Register (Staff)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "05bce671-c298-425a-b3d6-805669af6fef",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has success field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Response has user data with staff role\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('email');",
+                  "    pm.expect(jsonData.data).to.have.property('role');",
+                  "    pm.expect(jsonData.data.role).to.eql('staff');",
+                  "});",
+                  "",
+                  "// Save user ID for later use",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"test_staff_id\", jsonData.data.id);",
+                  "    pm.collectionVariables.set(\"test_staff_email\", jsonData.data.email);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "476870a6-ee6c-414b-afc6-5b43d66331b7",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test.staff@unsri.ac.id\",\n  \"password\": \"password123\",\n  \"role\": \"staff\",\n  \"nama\": \"Test Staff\",\n  \"nip\": \"1111111111\",\n  \"jabatan\": \"Administrator\",\n  \"unit\": \"IT\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Register new staff account"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has success field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Response has access_token\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('access_token');",
+                  "    pm.expect(jsonData.data.access_token).to.be.a('string');",
+                  "});",
+                  "",
+                  "pm.test(\"Response has user info with staff role\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('user');",
+                  "    pm.expect(jsonData.data.user).to.have.property('id');",
+                  "    pm.expect(jsonData.data.user).to.have.property('email');",
+                  "    pm.expect(jsonData.data.user.role).to.eql('staff');",
+                  "});",
+                  "",
+                  "// Save tokens for later use",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"access_token\", jsonData.data.access_token);",
+                  "    pm.collectionVariables.set(\"refresh_token\", jsonData.data.refresh_token);",
+                  "    pm.collectionVariables.set(\"user_id\", jsonData.data.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "42922908-c063-4dfa-b03c-d4ca39331ed9"
+              }
+            }
+          ],
+          "id": "8c41d56e-e406-49a4-b8d8-aa0e0c0b5e04",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{test_staff_email}}\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login and get access token"
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has user data with staff role\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('email');",
+                  "    pm.expect(jsonData.data.role).to.eql('staff');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "179a1079-f37e-4844-a6cd-94cefc6c7d8a"
+              }
+            }
+          ],
+          "id": "0259cd2e-f01f-4e39-b74d-8b7c25744ba3",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/verify",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "verify"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "9249e5c8-db50-4018-86bc-39646e78979c"
+    },
+    {
+      "name": "2. Profile Management",
+      "item": [
+        {
+          "name": "Get Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has user profile data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('email');",
+                  "    pm.expect(jsonData.data).to.have.property('role');",
+                  "    pm.expect(jsonData.data.role).to.eql('staff');",
+                  "});",
+                  "",
+                  "pm.test(\"Response has staff data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('staff');",
+                  "    pm.expect(jsonData.data.staff).to.have.property('nip');",
+                  "    pm.expect(jsonData.data.staff).to.have.property('nama');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "14003b8e-44ec-4a25-95ed-bf7faecdb3c9"
+              }
+            }
+          ],
+          "id": "e40c0047-dac0-4162-8b4d-48b42e3d7a52",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "ccbd0e3d-75d3-4da8-bfdc-fb17a9e5c215",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Profile updated successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.staff.nama).to.include('Updated');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "99b6c80d-b1d6-42c7-a6c9-1592685a9882",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"staff\": {\n    \"nama\": \"Test Staff Updated\",\n    \"jabatan\": \"Senior Administrator\",\n    \"unit\": \"IT\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "52f1c7b8-df18-44f7-8440-02110bf4f2f2"
+    },
+    {
+      "name": "3. Academic Calendar Management (Staff Only)",
+      "item": [
+        {
+          "name": "Get All Events",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has events array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "26be85ef-f2e2-4d1c-a986-a7be8be3d875"
+              }
+            }
+          ],
+          "id": "5168fd9d-1037-4ad5-b8e1-4a641792487f",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/calendar/events?page=1&per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "calendar",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Event",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "3970b78f-3385-48e4-8e46-a03cf62c4998",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has event data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('title');",
+                  "    pm.expect(jsonData.data).to.have.property('start_date');",
+                  "    pm.expect(jsonData.data).to.have.property('end_date');",
+                  "});",
+                  "",
+                  "// Save event ID",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"test_event_id\", jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "3d29ab49-970f-4d58-a015-3eeb66c08274",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Ujian Akhir Semester\",\n  \"description\": \"Ujian akhir semester ganjil 2024/2025\",\n  \"event_type\": \"exam\",\n  \"start_date\": \"2025-12-20T08:00:00Z\",\n  \"end_date\": \"2025-12-27T17:00:00Z\",\n  \"is_all_day\": false,\n  \"location\": \"Gedung A\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/calendar/events",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "calendar",
+                "events"
+              ]
+            },
+            "description": "Create academic event (Staff only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Event",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Event updated successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.title).to.include('Updated');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "77e2ec57-4135-4122-8e81-8e4128072f29"
+              }
+            }
+          ],
+          "id": "8640130b-7712-467c-b1ef-611e94e4e9fa",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Ujian Akhir Semester Updated\",\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/calendar/events/{{test_event_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "calendar",
+                "events",
+                "{{test_event_id}}"
+              ]
+            },
+            "description": "Update academic event (Staff only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Event by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has event data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('title');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "9c959682-736a-4815-abe9-32e02344495d"
+              }
+            }
+          ],
+          "id": "1160de83-7460-4eb2-ac21-191777014bc9",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/calendar/events/{{test_event_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "calendar",
+                "events",
+                "{{test_event_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Upcoming Events",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has upcoming events\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "921d44ff-0461-4359-b016-67c878af24e3"
+              }
+            }
+          ],
+          "id": "61dc5544-b33c-410d-851f-54310dc02f8a",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/calendar/events/upcoming?limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "calendar",
+                "events",
+                "upcoming"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Event",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 204\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "14a34e03-3eea-4ccd-8f2c-fc31f17acd43"
+              }
+            }
+          ],
+          "id": "23880954-b6be-41c5-8c7b-c68189259e78",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/calendar/events/{{test_event_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "calendar",
+                "events",
+                "{{test_event_id}}"
+              ]
+            },
+            "description": "Delete academic event (Staff only)"
+          },
+          "response": []
+        }
+      ],
+      "id": "b771bce2-918d-4d48-83cc-62793f196994"
+    },
+    {
+      "name": "4. Geofencing Management (Staff Only)",
+      "item": [
+        {
+          "name": "Get All Geofences",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has geofences array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "1bfbdf9d-0449-4123-b241-b2f9dc68da04"
+              }
+            }
+          ],
+          "id": "a4bffcd4-0219-4e32-b627-53bcdbf197be",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/location/geofences",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "location",
+                "geofences"
+              ]
+            },
+            "description": "View all allowed geofence areas"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Geofence",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has geofence data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('name');",
+                  "    pm.expect(jsonData.data).to.have.property('latitude');",
+                  "    pm.expect(jsonData.data).to.have.property('longitude');",
+                  "    pm.expect(jsonData.data).to.have.property('radius');",
+                  "});",
+                  "",
+                  "// Save geofence ID",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"test_geofence_id\", jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "ea2dfd1a-090a-4a3c-b2bf-28a407a42be1"
+              }
+            }
+          ],
+          "id": "1c521081-234f-42a1-abd3-b44b29ca4aef",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Gedung Utama\",\n  \"description\": \"Geofence untuk gedung utama kampus\",\n  \"latitude\": -2.9916,\n  \"longitude\": 104.7565,\n  \"radius\": 100\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/location/geofences",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "location",
+                "geofences"
+              ]
+            },
+            "description": "Create geofence area (Staff only). Radius in meters."
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Location",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 400\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test(\"Location is valid\", function () {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData.data).to.have.property('id');",
+                  "    });",
+                  "} else {",
+                  "    pm.test(\"Location is invalid\", function () {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData.error.message).to.include('location');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "50500b99-60b5-486c-812f-8563a36fa691"
+              }
+            }
+          ],
+          "id": "a664e2cb-e44b-4018-bd94-e35a5d3599ee",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": -2.9916,\n  \"longitude\": 104.7565\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/location/validate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "location",
+                "validate"
+              ]
+            },
+            "description": "Check if location is within allowed geofence"
+          },
+          "response": []
+        }
+      ],
+      "id": "ca2e3f87-2bbf-4b6d-9ac7-57f9ad244eb1"
+    },
+    {
+      "name": "5. User Management (Staff Only)",
+      "item": [
+        {
+          "name": "Search Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has users array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "587a60e0-72eb-40ec-88bd-356836871cb2"
+              }
+            }
+          ],
+          "id": "c9a8b81b-abca-42dc-b185-6d64215063e4",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/search?q=test&role=mahasiswa",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "test"
+                },
+                {
+                  "key": "role",
+                  "value": "mahasiswa"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has user data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('email');",
+                  "    pm.expect(jsonData.data).to.have.property('role');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "84f74e4e-2628-4f64-bcdf-06f83ed52870"
+              }
+            }
+          ],
+          "id": "64f44dfe-33c7-4198-9cba-d851e0ab2d1f",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{user_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Mahasiswa by NIM",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "faf5dc13-8dd0-48d0-b201-aa7e04f6a767",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has mahasiswa data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('nim');",
+                  "    pm.expect(jsonData.data).to.have.property('nama');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "15ccafba-8be5-491a-a72e-8268bd20d70e",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/mahasiswa/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "mahasiswa",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1234567891"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dosen by NIP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has dosen data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('nip');",
+                  "    pm.expect(jsonData.data).to.have.property('nama');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "59f5230a-c752-4037-bc24-fcca354bfd06"
+              }
+            }
+          ],
+          "id": "617af8c5-65d6-47e1-afe5-d81f1ede9758",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/dosen/9876543210",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "dosen",
+                "9876543210"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Staff by NIP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has staff data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('nip');",
+                  "    pm.expect(jsonData.data).to.have.property('nama');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "a09f121c-8a63-4fd8-b963-eed93337f42b"
+              }
+            }
+          ],
+          "id": "0072fe66-a2e1-4804-81de-076ef76ad31d",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/staff/1111111111",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "staff",
+                "1111111111"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "d2fcc089-0bcd-491e-b8ec-4070dfb9c8ce"
+    },
+    {
+      "name": "6. Work Attendance (HRIS) - Staff Only",
+      "item": [
+        {
+          "name": "Check In",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 201\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has success field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "6dec6faf-76a5-4d0b-a63d-06f4b3cdfbd6"
+              }
+            }
+          ],
+          "id": "1d02b95e-3bc3-4a46-8a02-6b9cdc370f0d",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": -2.9916,\n  \"longitude\": 104.7565\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/work-attendance/check-in",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "work-attendance",
+                "check-in"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Work Attendance Records",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has attendance records array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "e33f46fc-18e6-4e4e-801c-cd356c4051c6"
+              }
+            }
+          ],
+          "id": "eff31b30-c50b-437f-96ef-bd9271411142",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/work-attendance/records?page=1&per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "work-attendance",
+                "records"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Shift Patterns",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has shift patterns array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "// Save first shift pattern ID if available",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.length > 0) {",
+                  "        pm.collectionVariables.set(\"test_shift_pattern_id\", jsonData.data[0].id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "3082aaf7-b17a-4c0d-b178-97159b8718c2"
+              }
+            }
+          ],
+          "id": "597bb462-bccc-4f9b-a7e8-c9f9fafd09e1",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/work-attendance/shifts?page=1&per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "work-attendance",
+                "shifts"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Shift Pattern",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has shift pattern data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('shift_code');",
+                  "    pm.expect(jsonData.data).to.have.property('shift_name');",
+                  "});",
+                  "",
+                  "// Save shift pattern ID",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"test_shift_pattern_id\", jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "04196dbb-47aa-4488-8178-23c07d687933"
+              }
+            }
+          ],
+          "id": "e3b25cc2-77eb-4ae9-90fa-77f0dc0ddd3c",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shift_name\": \"Shift Pagi\",\n  \"shift_code\": \"SHIFT-001\",\n  \"start_time\": \"08:00\",\n  \"end_time\": \"17:00\",\n  \"break_duration_minutes\": 60,\n  \"is_night_shift\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/work-attendance/shifts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "work-attendance",
+                "shifts"
+              ]
+            },
+            "description": "Create shift pattern (Dosen/Staff only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Shift Pattern",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Shift pattern updated successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('start_time');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "49c2afb6-d36a-4277-b3d4-667eece593e0"
+              }
+            }
+          ],
+          "id": "970d9440-5c08-4b84-b902-40d85cf692f1",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start_time\": \"09:00\",\n  \"end_time\": \"18:00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/work-attendance/shifts/{{test_shift_pattern_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "work-attendance",
+                "shifts",
+                "{{test_shift_pattern_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create User Shift",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "db350703-bcff-45fc-89c3-badd62231d05",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has user shift data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('user_id');",
+                  "    pm.expect(jsonData.data).to.have.property('shift_pattern_id');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "027adb73-cb91-444a-bccd-e2cf3d08bd52",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"shift_id\": \"{{test_shift_pattern_id}}\",\n  \"effective_from\": \"2025-12-20\",\n  \"effective_until\": \"2025-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/work-attendance/user-shifts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "work-attendance",
+                "user-shifts"
+              ]
+            },
+            "description": "Assign shift pattern to user (Dosen/Staff only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Work Schedule",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "c5890d37-9630-4791-9fd9-9ce95e488301",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has work schedule data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('user_id');",
+                  "    pm.expect(jsonData.data).to.have.property('date');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "ae051916-5c88-42c3-8de7-c2ccb46fd241",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"shift_id\": \"{{test_shift_pattern_id}}\",\n  \"schedule_date\": \"2025-12-20\",\n  \"start_time\": \"08:00\",\n  \"end_time\": \"17:00\",\n  \"work_type\": \"regular\",\n  \"location\": \"Kantor Pusat\",\n  \"is_holiday\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/work-attendance/schedules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "work-attendance",
+                "schedules"
+              ]
+            },
+            "description": "Create work schedule (Dosen/Staff only)"
+          },
+          "response": []
+        }
+      ],
+      "id": "e1565a58-3e59-43ad-8daa-640f1da1b7fd"
+    },
+    {
+      "name": "7. Course Management",
+      "item": [
+        {
+          "name": "Get All Courses",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has courses array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "// Save first course ID if available",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.length > 0) {",
+                  "        pm.collectionVariables.set(\"test_course_id\", jsonData.data[0].id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "e09b360b-18fd-4c25-a273-7370b176fe63"
+              }
+            }
+          ],
+          "id": "dafc2fbb-d0be-486d-a4a3-6d69fdc4f4db",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses?page=1&per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Course",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has course data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('code');",
+                  "    pm.expect(jsonData.data).to.have.property('name');",
+                  "});",
+                  "",
+                  "// Save course ID",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"test_course_id\", jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "8d6d2a77-2fd8-4db7-bc1c-1bedae5739f1"
+              }
+            }
+          ],
+          "id": "64b99e17-5cc8-4052-98da-a0bd997e1445",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"IF999\",\n  \"name\": \"Mata Kuliah Test\",\n  \"name_en\": \"Test Course\",\n  \"credits\": 3,\n  \"semester\": 1,\n  \"prodi\": \"Teknik Informatika\",\n  \"description\": \"Mata kuliah untuk testing\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses"
+              ]
+            },
+            "description": "Create new course (Dosen/Staff only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Course",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Course updated successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.name).to.include('Updated');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "56976990-c1cb-4e93-b229-1e073512f31a"
+              }
+            }
+          ],
+          "id": "386f96c9-8067-43a7-af18-e5276f7f65d1",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mata Kuliah Test Updated\",\n  \"credits\": 4\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/{{test_course_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                "{{test_course_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Course",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 204\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "c55accd9-b3e6-4cea-a95c-b7ed0f9d821c"
+              }
+            }
+          ],
+          "id": "729df668-10a4-4ffe-baa8-53d9a4de472d",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/{{test_course_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                "{{test_course_id}}"
+              ]
+            },
+            "description": "Delete course (Dosen/Staff only)"
+          },
+          "response": []
+        }
+      ],
+      "id": "080511dc-3885-46a3-aff1-08da19f8287f"
+    },
+    {
+      "name": "8. Class Management",
+      "item": [
+        {
+          "name": "Create Class",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has class data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('class_code');",
+                  "});",
+                  "",
+                  "// Save class ID",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"test_class_id\", jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "4ad816ec-2c0f-4a9f-91c8-864d52523850"
+              }
+            }
+          ],
+          "id": "d9e56cea-2dd0-4c34-9b22-71e4f3b735ff",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"course_id\": \"{{test_course_id}}\",\n  \"class_code\": \"IF999-A\",\n  \"class_name\": \"Kelas A\",\n  \"semester\": \"2024/2025\",\n  \"capacity\": 40,\n  \"dosen_id\": \"<dosen_id>\",\n  \"room\": \"Lab. Komputer 1\",\n  \"day_of_week\": 1,\n  \"start_time\": \"08:00\",\n  \"end_time\": \"10:00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/classes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "classes"
+              ]
+            },
+            "description": "Create new class (Dosen/Staff only)"
+          },
+          "response": []
+        }
+      ],
+      "id": "ff9ffc4c-7282-4b08-ad51-22498c8edbb6"
+    },
+    {
+      "name": "9. Enrollment Management",
+      "item": [
+        {
+          "name": "Approve Enrollment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Enrollment approved successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.status).to.eql('approved');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "ee9c83f8-a44c-430e-8889-6c33015b6f7b"
+              }
+            }
+          ],
+          "id": "8a93e343-db53-48e5-81d3-bb23a904bd29",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"approved\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/enrollments/{{test_enrollment_id}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "enrollments",
+                "{{test_enrollment_id}}",
+                "status"
+              ]
+            },
+            "description": "Approve enrollment (Dosen/Staff only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Enrollment Grade",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Grade updated successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.grade).to.eql('A');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "1d1f5cc4-02be-45cf-b81e-efdd5d4cee29"
+              }
+            }
+          ],
+          "id": "1159c36c-a7c9-4e7e-ac16-3deace7d4914",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"grade\": \"A\",\n  \"score\": 95\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/enrollments/{{test_enrollment_id}}/grade",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "enrollments",
+                "{{test_enrollment_id}}",
+                "grade"
+              ]
+            },
+            "description": "Update student grade (Dosen/Staff only)"
+          },
+          "response": []
+        }
+      ],
+      "id": "dd5123e9-0dec-451b-a786-dc871dfb3d15"
+    },
+    {
+      "name": "10. Schedule Management",
+      "item": [
+        {
+          "name": "Create Schedule",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has schedule data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('date');",
+                  "});",
+                  "",
+                  "// Save schedule ID",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"test_schedule_id\", jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "2fd6b012-3eda-48fc-ac6e-c4286d37f7d9"
+              }
+            }
+          ],
+          "id": "2cb8ef8a-ac55-479b-860a-c6a6ed682b0b",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"course_id\": \"{{test_course_id}}\",\n  \"course_code\": \"IF999\",\n  \"course_name\": \"Mata Kuliah Test\",\n  \"dosen_id\": \"<dosen_id>\",\n  \"room\": \"Lab. Komputer 1\",\n  \"day_of_week\": 1,\n  \"start_time\": \"08:00\",\n  \"end_time\": \"10:00\",\n  \"date\": \"2024-12-20\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/schedules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "schedules"
+              ]
+            },
+            "description": "Create schedule (Dosen/Staff only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Schedule",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 204\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "571fb021-dfb0-4d47-a761-a111f82fd3da"
+              }
+            }
+          ],
+          "id": "3ba78dd9-1789-45b3-8f6d-fb45dac531a2",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/schedules/{{test_schedule_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "schedules",
+                "{{test_schedule_id}}"
+              ]
+            },
+            "description": "Delete schedule (Dosen/Staff only)"
+          },
+          "response": []
+        }
+      ],
+      "id": "a7b8aec5-13a9-4f28-a5be-f0d2854651d4"
+    },
+    {
+      "name": "11. Attendance Management",
+      "item": [
+        {
+          "name": "Generate QR Code",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "9e33b2f4-939c-448b-a1a8-ec57eabb2d18",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "4fa4b00c-ae05-49c5-b685-2f4dd5c69569",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"schedule_id\": \"{{test_schedule_id}}\",\n  \"type\": \"kelas\",\n  \"duration\": 15\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/attendance/qr/generate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "attendance",
+                "qr",
+                "generate"
+              ]
+            },
+            "description": "Generate QR code for attendance (Dosen/Staff only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Manual Attendance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has attendance data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('status');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "e9f24c44-680b-4aef-b3cb-143d430464a3"
+              }
+            }
+          ],
+          "id": "3c7d9a50-9b0c-4d0e-a1a0-1df3f15d133b",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"<student_id>\",\n  \"schedule_id\": \"{{test_schedule_id}}\",\n  \"type\": \"kelas\",\n  \"status\": \"hadir\",\n  \"date\": \"2024-12-15\",\n  \"notes\": \"Manual entry by staff\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/attendance/manual",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "attendance",
+                "manual"
+              ]
+            },
+            "description": "Create manual attendance entry (Dosen/Staff only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Attendance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Attendance updated successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('status');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "13b3c02f-459b-457a-8225-d7e8ea9eaae5"
+              }
+            }
+          ],
+          "id": "51a4415f-15b8-40a5-ab28-53ac133b63f3",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"izin\",\n  \"notes\": \"Student has permission\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/attendance/{{test_attendance_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "attendance",
+                "{{test_attendance_id}}"
+              ]
+            },
+            "description": "Update attendance record (Dosen/Staff only)"
+          },
+          "response": []
+        }
+      ],
+      "id": "60fede3a-3c27-4c04-b213-7dfb472a74e5"
+    },
+    {
+      "name": "12. Broadcast Management",
+      "item": [
+        {
+          "name": "Create Broadcast",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has broadcast data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('title');",
+                  "    pm.expect(jsonData.data).to.have.property('type');",
+                  "});",
+                  "",
+                  "// Save broadcast ID",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"test_broadcast_id\", jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "4c2d5939-e542-4e96-8fbc-b3fe49784d47"
+              }
+            }
+          ],
+          "id": "f2ea9c77-b7ca-47d5-bcd6-856efdef1fe5",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Pengumuman Penting\",\n  \"content\": \"Pengumuman untuk semua pengguna\",\n  \"type\": \"general\",\n  \"priority\": \"high\",\n  \"scheduled_at\": \"2024-12-16T10:00:00Z\",\n  \"expires_at\": \"2024-12-20T23:59:59Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/broadcasts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "broadcasts"
+              ]
+            },
+            "description": "Create broadcast (Dosen/Staff only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Broadcast",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 204\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "7fb97760-ce93-4eb4-b8e7-71c57b7e3fbb"
+              }
+            }
+          ],
+          "id": "27687a67-6217-408e-a69e-64471f2f943a",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/broadcasts/{{test_broadcast_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "broadcasts",
+                "{{test_broadcast_id}}"
+              ]
+            },
+            "description": "Delete broadcast (Dosen/Staff only)"
+          },
+          "response": []
+        }
+      ],
+      "id": "4357a09b-ab89-44f0-b6ce-785fba19959a"
+    },
+    {
+      "name": "13. Leave Management",
+      "item": [
+        {
+          "name": "Approve Leave Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Leave request approved successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.status).to.eql('approved');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "3c87f2c1-e444-4dd7-b698-a966c04c7698"
+              }
+            }
+          ],
+          "id": "4ded7dbf-34fb-4f1c-a31a-fe74be4129a3",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approver_notes\": \"Approved\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/leave-requests/{{test_leave_request_id}}/approve",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "leave-requests",
+                "{{test_leave_request_id}}",
+                "approve"
+              ]
+            },
+            "description": "Approve leave request (Dosen/Staff only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Reject Leave Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Leave request rejected successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.status).to.eql('rejected');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "e251a6d7-344d-4b56-93d6-f9b1fdbce9da"
+              }
+            }
+          ],
+          "id": "b0b4a6d6-8948-4870-b4a2-cc4fddda9461",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rejection_reason\": \"Not enough quota\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/leave-requests/{{test_leave_request_id}}/reject",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "leave-requests",
+                "{{test_leave_request_id}}",
+                "reject"
+              ]
+            },
+            "description": "Reject leave request (Dosen/Staff only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Leave Quota",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has leave quota data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('quota_days');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "7ab2eb9e-9b25-4177-9ed5-f9eaf24ac911"
+              }
+            }
+          ],
+          "id": "9a65443b-a1a9-4f40-8f87-ebc82ccee444",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"<user_id>\",\n  \"leave_type\": \"ANNUAL_LEAVE\",\n  \"quota_days\": 12,\n  \"year\": 2024\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/leave-quotas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "leave-quotas"
+              ]
+            },
+            "description": "Create leave quota (Dosen/Staff only)"
+          },
+          "response": []
+        }
+      ],
+      "id": "8370b702-8597-48f1-b007-3aefa182e6b0"
+    },
+    {
+      "name": "14. Master Data Management",
+      "item": [
+        {
+          "name": "Create Study Program",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has study program data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('code');",
+                  "    pm.expect(jsonData.data).to.have.property('name');",
+                  "});",
+                  "",
+                  "// Save study program ID",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"test_study_program_id\", jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "66c3d9f9-bd5b-4cfd-9563-c6bec4920235"
+              }
+            }
+          ],
+          "id": "356df26c-f0bc-40cd-8a05-535858f0d713",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"IF-TEST\",\n  \"name\": \"Teknik Informatika Test\",\n  \"name_en\": \"Informatics Engineering Test\",\n  \"faculty\": \"Fakultas Ilmu Komputer\",\n  \"degree_level\": \"S1\",\n  \"accreditation\": \"A\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/study-programs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "study-programs"
+              ]
+            },
+            "description": "Create study program (Dosen/Staff only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Study Program",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Study program updated successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.name).to.include('Updated');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "1e1b5082-4e7c-4380-8b63-22c367de15f4"
+              }
+            }
+          ],
+          "id": "88a3c8b9-8d4b-4b6d-a532-3cdc4e41cff8",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Teknik Informatika Test Updated\",\n  \"accreditation\": \"A+\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/study-programs/{{test_study_program_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "study-programs",
+                "{{test_study_program_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Academic Period",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has academic period data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('period_code');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "ad27006b-6375-4067-9734-2afc82a0a5a1"
+              }
+            }
+          ],
+          "id": "e7f0dc3b-80d1-44a4-b17a-d3f2cd7758e0",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"period_code\": \"2024/2025\",\n  \"name\": \"Tahun Akademik 2024/2025\",\n  \"start_date\": \"2024-08-01\",\n  \"end_date\": \"2025-07-31\",\n  \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/academic-periods",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "academic-periods"
+              ]
+            },
+            "description": "Create academic period (Dosen/Staff only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Room",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has room data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('code');",
+                  "    pm.expect(jsonData.data).to.have.property('name');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "177bd73a-8673-4fa0-8111-bb1df48e6b14"
+              }
+            }
+          ],
+          "id": "518a1e71-df54-434a-bc27-e9ccaefc213e",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"LAB-001\",\n  \"name\": \"Laboratorium Komputer 1\",\n  \"building\": \"Gedung A\",\n  \"floor\": 1,\n  \"capacity\": 40,\n  \"facilities\": \"Komputer, Proyektor\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/rooms",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "rooms"
+              ]
+            },
+            "description": "Create room (Dosen/Staff only)"
+          },
+          "response": []
+        }
+      ],
+      "id": "97791a23-2fb3-4dd8-8316-ae765a2ff1e7"
+    },
+    {
+      "name": "15. Error Scenarios",
+      "item": [
+        {
+          "name": "Create Course Without Required Fields",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates validation error\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.false;",
+                  "    pm.expect(jsonData.error.code).to.include('VALIDATION');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "4eafef7a-eeff-471d-bd7a-507d8d85d468"
+              }
+            }
+          ],
+          "id": "b5cefcc9-10bf-4d02-ba9b-60925e2b679d",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Invalid Course\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses"
+              ]
+            },
+            "description": "Test validation error handling"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Non-Existent Event",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates not found\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.false;",
+                  "    pm.expect(jsonData.error.code).to.include('NOT_FOUND');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "d7b9b715-7b50-4a01-8ec4-06150d4386b8"
+              }
+            }
+          ],
+          "id": "4d88868d-dbe2-473b-ac52-aeb0adc8051f",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/calendar/events/00000000-0000-0000-0000-000000000000",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "calendar",
+                "events",
+                "00000000-0000-0000-0000-000000000000"
+              ]
+            },
+            "description": "Test 404 error handling"
+          },
+          "response": []
+        }
+      ],
+      "id": "d0b67ef9-d357-4e96-8bd9-93b317b749bc"
+    }
+  ],
+  "variable": [
+    {
+      "id": "783fd4c9-2aab-4a74-b31a-e777e0c5d01d",
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "id": "2350e11c-653b-428f-9103-d4d5415fee5a",
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "ff894309-d068-4d06-8321-f8a2665e8722",
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "3517f412-2ab4-4c57-81d1-d726babd25e5",
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "62aa3dbe-187f-4a1d-8705-316ff0ae74fc",
+      "key": "test_staff_email",
+      "value": "test.staff@unsri.ac.id",
+      "type": "string"
+    },
+    {
+      "id": "161731f6-c523-4e7a-bcc1-669614718170",
+      "key": "test_staff_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "d8b8d4fa-fff5-49bf-bba1-eddcdc8dc1d3",
+      "key": "test_event_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "e414db47-dda8-40fd-b4f7-315f9baaa0da",
+      "key": "test_geofence_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "233af011-dcf3-4599-adb8-db5f344455bf",
+      "key": "test_shift_pattern_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "c94707d0-b99e-4afc-a1f5-e343280b2873",
+      "key": "test_course_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "80d316ae-a7e3-4868-bfc5-13d66158d6cc",
+      "key": "test_class_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "73f1a743-cbf1-4093-8e50-4202dbe67ce0",
+      "key": "test_enrollment_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "42398b8d-1283-4c7c-b000-6497f3fe9a7f",
+      "key": "test_schedule_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "5572cae4-60f6-4234-a79c-70c024400426",
+      "key": "test_qr_code",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "34f0d781-fdee-4b7f-9a1c-268e2632763b",
+      "key": "test_attendance_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "b2720257-91af-4331-b794-c7c3e6654f2a",
+      "key": "test_broadcast_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "ed10dc14-82d7-439d-8758-5b89b389caa2",
+      "key": "test_leave_request_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "bfdbe1f8-b3dc-4777-81cc-b2ca75ce7428",
+      "key": "test_study_program_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

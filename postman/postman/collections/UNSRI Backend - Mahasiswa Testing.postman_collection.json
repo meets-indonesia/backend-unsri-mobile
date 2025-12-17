@@ -1,0 +1,2637 @@
+{
+  "info": {
+    "_postman_id": "f30bf652-6e22-4a3a-82bf-bf9c2dc8c102",
+    "name": "UNSRI Backend - Mahasiswa Testing",
+    "description": "Testing collection untuk role Mahasiswa dengan test scripts dan assertions lengkap",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Register (Mahasiswa)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has success field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Response has user data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('email');",
+                  "    pm.expect(jsonData.data).to.have.property('role');",
+                  "    pm.expect(jsonData.data.role).to.eql('mahasiswa');",
+                  "});",
+                  "",
+                  "// Save user ID for later use",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"test_user_id\", jsonData.data.id);",
+                  "    pm.collectionVariables.set(\"test_user_email\", jsonData.data.email);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "3dcd2e59-ffa1-4d4c-a5ba-89b8245e5777"
+              }
+            }
+          ],
+          "id": "67333275-d8b7-4a93-82c5-c440c5141805",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test.mahasiswa@unsri.ac.id\",\n  \"password\": \"password123\",\n  \"role\": \"mahasiswa\",\n  \"nama\": \"Test Mahasiswa\",\n  \"nim\": \"1234567890\",\n  \"prodi\": \"Teknik Informatika\",\n  \"angkatan\": 2023\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Register new student account"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has success field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Response has access_token\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('access_token');",
+                  "    pm.expect(jsonData.data.access_token).to.be.a('string');",
+                  "});",
+                  "",
+                  "pm.test(\"Response has refresh_token\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('refresh_token');",
+                  "    pm.expect(jsonData.data.refresh_token).to.be.a('string');",
+                  "});",
+                  "",
+                  "pm.test(\"Response has user info\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('user');",
+                  "    pm.expect(jsonData.data.user).to.have.property('id');",
+                  "    pm.expect(jsonData.data.user).to.have.property('email');",
+                  "    pm.expect(jsonData.data.user.role).to.eql('mahasiswa');",
+                  "});",
+                  "",
+                  "// Save tokens for later use",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"access_token\", jsonData.data.access_token);",
+                  "    pm.collectionVariables.set(\"refresh_token\", jsonData.data.refresh_token);",
+                  "    pm.collectionVariables.set(\"user_id\", jsonData.data.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "86f00cba-ae9a-4370-bc6f-9f4fe351c725"
+              }
+            }
+          ],
+          "id": "3ffbefad-54b8-4a84-8288-c62b7fdaa7a1",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{test_user_email}}\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login and get access token"
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has success field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Response has user data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('email');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "b0cfc37f-287f-4e0c-8089-ec5881ce0ea9"
+              }
+            }
+          ],
+          "id": "90539ffc-36cb-4c4f-b188-0be5f8c8f870",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/verify",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "verify"
+              ]
+            },
+            "description": "Verify access token validity"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has new access_token\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('access_token');",
+                  "});",
+                  "",
+                  "// Update access token",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"access_token\", jsonData.data.access_token);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "a3679583-6c70-47d0-afbf-3ff166db4521"
+              }
+            }
+          ],
+          "id": "e473feb0-1b86-4534-9ad3-0f56acb7b94f",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Refresh access token using refresh token"
+          },
+          "response": []
+        }
+      ],
+      "id": "9da69267-7cc5-4739-ba9a-a2651477414d"
+    },
+    {
+      "name": "2. Profile Management",
+      "item": [
+        {
+          "name": "Get Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has success field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Response has user profile data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('email');",
+                  "    pm.expect(jsonData.data).to.have.property('role');",
+                  "    pm.expect(jsonData.data.role).to.eql('mahasiswa');",
+                  "});",
+                  "",
+                  "pm.test(\"Response has mahasiswa data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('mahasiswa');",
+                  "    pm.expect(jsonData.data.mahasiswa).to.have.property('nim');",
+                  "    pm.expect(jsonData.data.mahasiswa).to.have.property('nama');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "2779d9e0-7ac0-4c2a-a492-2dc5e88e190c"
+              }
+            }
+          ],
+          "id": "f4429afe-27a3-4621-b61c-4c5e55995574",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has success field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Profile updated successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.mahasiswa.nama).to.include('Updated');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "0c316e06-f3ab-454a-8414-abaeb9ecefa2"
+              }
+            }
+          ],
+          "id": "7c0077ce-4ef0-4762-9049-fe84a5425545",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mahasiswa\": {\n    \"nama\": \"Test Mahasiswa Updated\",\n    \"prodi\": \"Teknik Informatika\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "0ff5e700-9469-469b-ac98-21dcbe2b92df"
+    },
+    {
+      "name": "3. Academic Management",
+      "item": [
+        {
+          "name": "Get All Courses",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has success field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Response has data array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"Response has meta for pagination\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('meta');",
+                  "    pm.expect(jsonData.meta).to.have.property('page');",
+                  "    pm.expect(jsonData.meta).to.have.property('per_page');",
+                  "});",
+                  "",
+                  "// Save first course ID if available",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.length > 0) {",
+                  "        pm.collectionVariables.set(\"test_course_id\", jsonData.data[0].id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "0c95e314-de3f-4690-9921-8e64377aaa4c"
+              }
+            }
+          ],
+          "id": "58f997be-3d03-4bef-9a41-3893a1e5a71f",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses?page=1&per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Course by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has course data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('code');",
+                  "    pm.expect(jsonData.data).to.have.property('name');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "02bc7c0c-732c-4d7f-96ad-ff4da6e425ad"
+              }
+            }
+          ],
+          "id": "fdf2d6fc-cfbb-40c1-a5db-ec35a1023b5d",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/{{test_course_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                "{{test_course_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Courses by Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has courses array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "34db8974-cb40-4ff7-90fa-58f801edac3c"
+              }
+            }
+          ],
+          "id": "468deb86-405e-4852-8814-78326e18f47d",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/by-student/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                "by-student",
+                "{{user_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Classes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has classes array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "// Save first class ID if available",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.length > 0) {",
+                  "        pm.collectionVariables.set(\"test_class_id\", jsonData.data[0].id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "811fd738-69b7-4e13-96fb-ea7b9a08f414"
+              }
+            }
+          ],
+          "id": "a31238f5-307e-490d-925a-e631d4d0df3e",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/classes?page=1&per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "classes"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Enrollment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has enrollment data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('class_id');",
+                  "    pm.expect(jsonData.data).to.have.property('user_id');",
+                  "});",
+                  "",
+                  "// Save enrollment ID",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"test_enrollment_id\", jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "bbefa384-0b3c-4601-9a5b-cfde4b667366"
+              }
+            }
+          ],
+          "id": "c65b85a3-b1c7-4e46-92f8-fad94fc51ce4",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"class_id\": \"{{test_class_id}}\",\n  \"semester\": \"2024/2025\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/enrollments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "enrollments"
+              ]
+            },
+            "description": "Enroll yourself to a class"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Enrollments by Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has enrollments array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "539b3ab5-f00b-45da-ab1b-b27dd893783f"
+              }
+            }
+          ],
+          "id": "dfd80b03-3715-423b-8cae-7593a8d2ec76",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/enrollments/by-student/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "enrollments",
+                "by-student",
+                "{{user_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Enrollment (Cancel Enrollment)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 204\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "db8cac90-5312-434a-aeab-969b24a53095"
+              }
+            }
+          ],
+          "id": "eefb0f2d-cb68-4944-ac0f-1f381e57ece5",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/enrollments/{{test_enrollment_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "enrollments",
+                "{{test_enrollment_id}}"
+              ]
+            },
+            "description": "Cancel enrollment"
+          },
+          "response": []
+        }
+      ],
+      "id": "6860022a-6332-487b-8c92-2f389766d4ec"
+    },
+    {
+      "name": "4. Attendance Management",
+      "item": [
+        {
+          "name": "Tap In",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 201\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has success field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "});",
+                  "",
+                  "// Check if location validation failed",
+                  "if (pm.response.code === 400) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.test(\"Error message indicates location issue\", function () {",
+                  "        pm.expect(jsonData.error.message).to.include('location');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "4e1681c9-aa5e-46a6-b2fa-9666443df11c"
+              }
+            }
+          ],
+          "id": "fbac410c-170c-4784-a9af-e2cffde4ef33",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": -2.9916,\n  \"longitude\": 104.7565\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/attendance/tap-in",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "attendance",
+                "tap-in"
+              ]
+            },
+            "description": "Tap in to campus (requires location within geofence)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Attendance History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has attendance array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "5f57cd3d-018f-472f-9950-8f79e2f1285d"
+              }
+            }
+          ],
+          "id": "92b07d19-d1b9-4217-b1cc-c5115bd04b6c",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/attendance/history?page=1&per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "attendance",
+                "history"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Attendance Statistics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has statistics data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "cc049935-cd48-477e-91da-de6caba21f34"
+              }
+            }
+          ],
+          "id": "bed7085d-412e-4c57-8eb4-eff36b5a3c48",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/attendance/statistics?start_date=2024-01-01&end_date=2024-12-31",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "attendance",
+                "statistics"
+              ],
+              "query": [
+                {
+                  "key": "start_date",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "end_date",
+                  "value": "2024-12-31"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Attendance Overview",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has overview data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "b2c463d1-78c7-44cf-bc2f-922801e17da3"
+              }
+            }
+          ],
+          "id": "cc9b0b2f-1b9c-4c21-83fe-7ef0977ee6a6",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/attendance/overview",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "attendance",
+                "overview"
+              ]
+            },
+            "description": "Get today's schedules, upcoming schedules, monthly statistics, and current tap in status"
+          },
+          "response": []
+        },
+        {
+          "name": "Tap Out",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 400\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400]);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    pm.test(\"Tap out successful\", function () {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData.success).to.be.true;",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "e0edf6b4-a58a-4109-8fec-7855b9fb69e6"
+              }
+            }
+          ],
+          "id": "4ef07485-8b8e-4a6a-a434-2a737ab107d2",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": -2.9916,\n  \"longitude\": 104.7565\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/attendance/tap-out",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "attendance",
+                "tap-out"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Check-In Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has check-in status\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "1fc2af7f-3e80-4965-8bfa-a376d7722cfc"
+              }
+            }
+          ],
+          "id": "6f845afe-3f50-4f9b-b8fb-782e21525405",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/location/check-in-status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "location",
+                "check-in-status"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Scan QR Code for Attendance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 400\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400]);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    pm.test(\"QR scan successful\", function () {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData.success).to.be.true;",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "22c24264-f633-4c2c-b0b5-0f7530cdf516"
+              }
+            }
+          ],
+          "id": "46e52522-e7c3-41df-a9f0-ef09bef40175",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"qr_data\": \"{{test_qr_code}}\",\n  \"latitude\": -2.9916,\n  \"longitude\": 104.7565\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/attendance/qr/scan",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "attendance",
+                "qr",
+                "scan"
+              ]
+            },
+            "description": "Scan QR code to record class attendance"
+          },
+          "response": []
+        }
+      ],
+      "id": "0c88d540-5ed3-4ad7-ab05-1c9594f83684"
+    },
+    {
+      "name": "5. Communication",
+      "item": [
+        {
+          "name": "Get All Broadcasts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has broadcasts array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "9e042f09-66f5-43a0-99a1-9ae6720380a1"
+              }
+            }
+          ],
+          "id": "ffa09704-3061-41ed-afa4-a66e57940b75",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/broadcasts?page=1&per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "broadcasts"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Notifications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has notifications array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "2584b8b4-4006-4b59-a46d-be85aaf7583b"
+              }
+            }
+          ],
+          "id": "67f25160-cc68-4d1b-bd92-9fa5c11f1729",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications?page=1&per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "afc84c04-088c-463b-9333-8cc077232808"
+    },
+    {
+      "name": "6. Error Scenarios",
+      "item": [
+        {
+          "name": "Login with Wrong Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has error field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.false;",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "147854d9-2c1e-4a86-a44d-97b9ac32a4cf"
+              }
+            }
+          ],
+          "id": "35312d71-5fae-42cc-ac0f-95daba6b50e2",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{test_user_email}}\",\n  \"password\": \"wrongpassword\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Test error handling for wrong password"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile Without Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates unauthorized\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.false;",
+                  "    pm.expect(jsonData.error.code).to.include('UNAUTHORIZED');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "d87b8fa6-74c2-4afc-adba-5f871f7b61a4"
+              }
+            }
+          ],
+          "id": "1eb7a1a6-8749-4783-8404-8c64c7dda692",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "profile"
+              ]
+            },
+            "description": "Test authentication requirement"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Non-Existent Course",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates not found\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.false;",
+                  "    pm.expect(jsonData.error.code).to.include('NOT_FOUND');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "f7560ed8-33de-4a98-b6fb-143e5d0ef7c4"
+              }
+            }
+          ],
+          "id": "c9ed0410-4cb7-45b3-9f76-f7c467f0ab5f",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/courses/00000000-0000-0000-0000-000000000000",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                "00000000-0000-0000-0000-000000000000"
+              ]
+            },
+            "description": "Test 404 error handling"
+          },
+          "response": []
+        }
+      ],
+      "id": "bac0baf8-a2f6-45d5-acee-83f3edf37c0a"
+    },
+    {
+      "name": "7. Schedule Management",
+      "item": [
+        {
+          "name": "Get All Schedules",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has schedules array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "c1f744d3-f2c8-48de-a955-be1bb05d6a35"
+              }
+            }
+          ],
+          "id": "774c1791-81dd-4de2-ad29-be450188948e",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/schedules?page=1&per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "schedules"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Today's Schedules",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has schedules array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "9c04ad9a-ab64-4799-bee9-e36fd7874393"
+              }
+            }
+          ],
+          "id": "765e96be-89b3-451d-b390-f9bc9b207601",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/schedules/today",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "schedules",
+                "today"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "b4e0696e-ef61-4a1a-9418-2f175e626de4"
+    },
+    {
+      "name": "8. Academic Calendar",
+      "item": [
+        {
+          "name": "Get All Events",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has events array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "48f77c0f-d9ed-4f41-835d-ba7953d5701f"
+              }
+            }
+          ],
+          "id": "3487d465-6235-463f-9ec4-baa851660578",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/calendar/events?page=1&per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "calendar",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Upcoming Events",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has upcoming events\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "cdd0a981-677b-47d4-86fc-f0cbf35581a8"
+              }
+            }
+          ],
+          "id": "0331ac62-1540-4ea4-a361-24469e692070",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/calendar/events/upcoming?limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "calendar",
+                "events",
+                "upcoming"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "d195c8ec-553d-4591-9773-db68619613f5"
+    },
+    {
+      "name": "9. Access Control",
+      "item": [
+        {
+          "name": "Generate Access QR",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has QR data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('qr_code');",
+                  "});",
+                  "",
+                  "// Save QR code for validation test",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"test_qr_code\", jsonData.data.qr_code);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "d2765619-4219-4bb5-a9d4-0680fa02abad"
+              }
+            }
+          ],
+          "id": "ddbb8507-ebd4-490c-aa6a-b479d36f8d3e",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/qr/access/generate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qr",
+                "access",
+                "generate"
+              ]
+            },
+            "description": "Generate personal QR code for gate access"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Access History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has access history array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "2b35c260-4fe6-47ab-a5da-45083380259d"
+              }
+            }
+          ],
+          "id": "8729b6c9-c6ba-40c9-8840-9de8d1d43957",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/access/history?page=1&per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "access",
+                "history"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "1288f9d6-386d-47d6-b013-ef55a3121adf"
+    },
+    {
+      "name": "10. Quick Actions",
+      "item": [
+        {
+          "name": "Get Quick Actions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has quick actions\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "4bed0d34-d652-457c-b965-c81506ebf0e6"
+              }
+            }
+          ],
+          "id": "9e4e3d37-1deb-4dd7-a3c3-0b678fe54256",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/quick-actions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "quick-actions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Transcript",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has transcript data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "d7bd342d-da84-4cd0-8460-068996db657e"
+              }
+            }
+          ],
+          "id": "1cd7ef80-7717-4cde-b830-8dedd7b9cc69",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/quick-actions/transcript/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "quick-actions",
+                "transcript",
+                "{{user_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get KRS (Kartu Rencana Studi)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has KRS data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "7be88d4f-ff63-4c32-88d0-0d7a99f20f5a"
+              }
+            }
+          ],
+          "id": "65be2be9-9093-4f24-b396-611094a7d310",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/quick-actions/krs/{{user_id}}?semester=2024/2025",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "quick-actions",
+                "krs",
+                "{{user_id}}"
+              ],
+              "query": [
+                {
+                  "key": "semester",
+                  "value": "2024/2025"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Bimbingan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has bimbingan data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "9b46e9ef-aced-4b7d-8a06-aacdeedc656c"
+              }
+            }
+          ],
+          "id": "87756367-fe36-4737-b202-bca4990f16f8",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/quick-actions/bimbingan",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "quick-actions",
+                "bimbingan"
+              ]
+            },
+            "description": "Get thesis supervision data"
+          },
+          "response": []
+        }
+      ],
+      "id": "7a0148d1-a108-4dcb-9001-78c585e22084"
+    },
+    {
+      "name": "11. File Management",
+      "item": [
+        {
+          "name": "Get All Files",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has files array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "4450b8c6-0712-4c82-a93e-8f2dee02849a"
+              }
+            }
+          ],
+          "id": "235e9e70-c1fc-4601-b3de-20e4d0dcc7f1",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/files?page=1&per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "files"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "a77f4d0d-2ce5-422c-9870-3f75aa3524b8"
+    },
+    {
+      "name": "12. Search",
+      "item": [
+        {
+          "name": "Global Search",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has search results\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "ee084acf-04a5-4fd2-b889-6f21b7efa00f"
+              }
+            }
+          ],
+          "id": "2294015f-ed69-47d1-81f8-b86d03857dbf",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/search/global?q=test&types=courses,users&limit=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "search",
+                "global"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "test"
+                },
+                {
+                  "key": "types",
+                  "value": "courses,users"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "c1898086-36b1-4900-bf98-3625e0220819"
+    },
+    {
+      "name": "13. Reports",
+      "item": [
+        {
+          "name": "Get Attendance Report",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has report data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "3e371736-5074-4837-a737-9575e7f4ae0a"
+              }
+            }
+          ],
+          "id": "0ada2d1d-211a-4a1d-8771-244de6291c03",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reports/attendance?start_date=2024-01-01&end_date=2024-12-31",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reports",
+                "attendance"
+              ],
+              "query": [
+                {
+                  "key": "start_date",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "end_date",
+                  "value": "2024-12-31"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "af925537-49a8-4f9c-abd5-039357bf7aae"
+    },
+    {
+      "name": "14. Leave Management",
+      "item": [
+        {
+          "name": "Create Leave Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has leave request data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('leave_type');",
+                  "});",
+                  "",
+                  "// Save leave request ID",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"test_leave_request_id\", jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "2304c251-515a-4516-801d-43f1ab0f9abf"
+              }
+            }
+          ],
+          "id": "bf42a6db-2a50-408a-8336-bfcc88bcf2b3",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leave_type\": \"SICK_LEAVE\",\n  \"start_date\": \"2024-12-20\",\n  \"end_date\": \"2024-12-22\",\n  \"reason\": \"Sakit\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/leave-requests",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "leave-requests"
+              ]
+            },
+            "description": "Create leave request"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Leave Requests by User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has leave requests array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "7d9abaaa-0a60-44e7-a1fb-1b4591db6779"
+              }
+            }
+          ],
+          "id": "c42183d2-eb35-4fda-9bf8-409f5622265a",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/leave-requests/by-user/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "leave-requests",
+                "by-user",
+                "{{user_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Leave Quotas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has leave quotas array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "e088fea2-019b-4a7d-8aef-df1fd2e57303"
+              }
+            }
+          ],
+          "id": "8fab8cc7-c3bb-4135-b8aa-c8c4e2d3b6bc",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/leave-quotas/by-user/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "leave-quotas",
+                "by-user",
+                "{{user_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "26e6f229-eee9-41be-a608-c0766dd3dfdb"
+    },
+    {
+      "name": "15. Master Data (Read Only)",
+      "item": [
+        {
+          "name": "Get All Study Programs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has study programs array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "07831ffe-956f-4232-ab76-777bf8ad0c30"
+              }
+            }
+          ],
+          "id": "407595df-20e2-4737-9411-0ac6ae9d8dd2",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/study-programs?page=1&per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "study-programs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Active Academic Period",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has academic period data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('period_code');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "56eaa5e7-8c4e-4463-b5cc-49bf3a7f7821"
+              }
+            }
+          ],
+          "id": "f819b922-15e8-4d0b-ae98-85f874aaea6a",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/academic-periods/active",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "academic-periods",
+                "active"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "2a1c3772-a1ad-4513-9f14-fe5d3c5d5f06"
+    },
+    {
+      "name": "16. Location & Geofencing",
+      "item": [
+        {
+          "name": "Get All Geofences",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has geofences array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "5c26c8c8-34f3-4bb1-b136-6e1226fe0252"
+              }
+            }
+          ],
+          "id": "b849f93b-a64e-4c81-8fa9-902aa8fd5946",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/location/geofences",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "location",
+                "geofences"
+              ]
+            },
+            "description": "View all allowed geofence areas for tap in"
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Location",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 400\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test(\"Location is valid\", function () {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData.data).to.have.property('id');",
+                  "    });",
+                  "} else {",
+                  "    pm.test(\"Location is invalid\", function () {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData.error.message).to.include('location');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "id": "f4fd9b97-f65b-4de3-8f66-218bf1f69eda"
+              }
+            }
+          ],
+          "id": "f8b0250e-be4e-45d4-8f18-97dcbc754bfb",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": -2.9916,\n  \"longitude\": 104.7565\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/location/validate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "location",
+                "validate"
+              ]
+            },
+            "description": "Check if location is within allowed geofence"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Location History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has location history array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "id": "c0b33974-93d5-4a7e-aecb-4cde33dc3180"
+              }
+            }
+          ],
+          "id": "078da601-780e-4e12-9d08-20cc084bdaaa",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/location/history?page=1&per_page=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "location",
+                "history"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "13da7afc-e03a-4cf5-afbe-5d84fbd3eb69"
+    }
+  ],
+  "variable": [
+    {
+      "id": "457dbf72-f43c-49cb-acef-75477a7c16b4",
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "id": "8d71dcc9-6158-4349-8782-7f46892da8dc",
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "29c2855c-030e-4f18-8df6-a5a853a71b06",
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "3ba1e416-09f9-4237-8bfa-2df1f263afe9",
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "063f8f59-65dd-423f-8562-ec2231140c77",
+      "key": "test_user_email",
+      "value": "test.mahasiswa@unsri.ac.id",
+      "type": "string"
+    },
+    {
+      "id": "57a1f707-3c18-4490-8143-dc435753393e",
+      "key": "test_user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "768390f0-71d9-49ea-bfe3-93f62c5a9e7c",
+      "key": "test_course_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "086fc959-8a70-47f1-b4c1-ef2512d3723b",
+      "key": "test_class_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "98d94bab-35f6-4bbd-9a70-679e5ec545b9",
+      "key": "test_enrollment_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "f0335941-dce7-42e5-a534-01282c5a7fbf",
+      "key": "test_qr_code",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "f0abf178-5be3-45ac-94f2-2e3879a40d7f",
+      "key": "test_leave_request_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
