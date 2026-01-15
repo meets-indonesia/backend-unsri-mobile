@@ -69,6 +69,8 @@ func main() {
 	router := gin.Default()
 	router.Use(gin.Recovery())
 	router.MaxMultipartMemory = 10 << 20 // 10 MB
+	// Serve static files for direct URL access (e.g., http://localhost:8093/files/<type>/<name>)
+	router.Static("/files", cfg.Storage.BasePath)
 	handler.SetupRoutes(router, fileHandler, jwtToken)
 
 	srv := &http.Server{
@@ -99,4 +101,3 @@ func main() {
 
 	log.Info("Server exited")
 }
-

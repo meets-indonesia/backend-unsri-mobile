@@ -19,7 +19,7 @@ type AccessLog struct {
 	CreatedAt   time.Time `json:"created_at"`
 
 	// Relations
-	User User `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	User User `gorm:"foreignKey:UserID" json:"-"`
 }
 
 // TableName specifies the table name
@@ -48,7 +48,7 @@ type AccessPermission struct {
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
 
 	// Relations
-	User User `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	User User `gorm:"foreignKey:UserID" json:"-"`
 }
 
 // TableName specifies the table name
@@ -63,4 +63,3 @@ func (a *AccessPermission) BeforeCreate(tx *gorm.DB) error {
 	}
 	return nil
 }
-

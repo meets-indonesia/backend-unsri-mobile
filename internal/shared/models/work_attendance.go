@@ -157,12 +157,13 @@ type WorkAttendanceRecord struct {
 	Latitude       *float64             `json:"latitude,omitempty"`
 	Longitude      *float64             `json:"longitude,omitempty"`
 	GeofenceID     *string              `gorm:"type:uuid;index" json:"geofence_id,omitempty"`
+	PhotoID        *string              `gorm:"type:uuid;index" json:"photo_id,omitempty"`
 	Notes          string               `gorm:"type:text" json:"notes"`
 	CreatedAt      time.Time            `json:"created_at"`
 	UpdatedAt      time.Time            `json:"updated_at"`
 
 	// Relations
-	User     User          `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	User     User          `gorm:"foreignKey:UserID" json:"-"`
 	Schedule *WorkSchedule `gorm:"foreignKey:ScheduleID" json:"schedule,omitempty"`
 }
 

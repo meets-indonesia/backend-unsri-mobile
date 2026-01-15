@@ -48,8 +48,8 @@ type LeaveRequest struct {
 	DeletedAt       gorm.DeletedAt `gorm:"index" json:"-"`
 
 	// Relations
-	User      User  `gorm:"foreignKey:UserID" json:"user,omitempty"`
-	Approver  *User `gorm:"foreignKey:ApprovedBy" json:"approver,omitempty"`
+	User      User  `gorm:"foreignKey:UserID" json:"-"`
+	Approver  *User `gorm:"foreignKey:ApprovedBy" json:"-"`
 }
 
 // TableName specifies the table name
@@ -78,7 +78,7 @@ type LeaveQuota struct {
 	UpdatedAt       time.Time `json:"updated_at"`
 
 	// Relations
-	User User `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	User User `gorm:"foreignKey:UserID" json:"-"`
 }
 
 // TableName specifies the table name
@@ -102,4 +102,3 @@ func (l *LeaveQuota) BeforeUpdate(tx *gorm.DB) error {
 	l.RemainingQuota = l.TotalQuota - l.UsedQuota
 	return nil
 }
-

@@ -7,6 +7,7 @@ import (
 	"mime/multipart"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"unsri-backend/internal/file-storage/repository"
 	apperrors "unsri-backend/internal/shared/errors"
@@ -54,6 +55,7 @@ func (s *FileStorageService) UploadFile(ctx context.Context, userID string, req 
 	// Generate unique filename
 	ext := filepath.Ext(req.File.Filename)
 	fileName := fmt.Sprintf("%s%s", uuid.New().String(), ext)
+	fileID := uuid.New().String()
 
 	// Create directory if not exists
 	fileDir := filepath.Join(s.config.BasePath, req.FileType)
@@ -81,6 +83,7 @@ func (s *FileStorageService) UploadFile(ctx context.Context, userID string, req 
 
 	// Create file record
 	file := &models.File{
+		ID:           fileID,
 		UserID:       userID,
 		FileName:     fileName,
 		OriginalName: req.File.Filename,
@@ -88,7 +91,7 @@ func (s *FileStorageService) UploadFile(ctx context.Context, userID string, req 
 		MimeType:     req.File.Header.Get("Content-Type"),
 		Size:         req.File.Size,
 		Path:         filePath,
-		URL:          fmt.Sprintf("%s/%s/%s", s.config.BaseURL, req.FileType, fileName),
+		URL:          fmt.Sprintf("%s/api/v1/files/%s/download", strings.TrimSuffix(s.config.BaseURL, "/files"), fileID),
 		IsPublic:     req.IsPublic,
 	}
 

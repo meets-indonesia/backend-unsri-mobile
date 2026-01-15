@@ -4,10 +4,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"unsri-backend/internal/attendance/service"
 	"unsri-backend/internal/shared/logger"
 	"unsri-backend/internal/shared/utils"
+
+	"github.com/gin-gonic/gin"
 )
 
 // AttendanceHandler handles HTTP requests for attendance
@@ -548,7 +549,7 @@ func (h *AttendanceHandler) CheckIn(c *gin.Context) {
 	userID := c.GetString("user_id")
 
 	var req service.CheckInRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBind(&req); err != nil {
 		utils.ValidationErrorResponse(c, err)
 		return
 	}
@@ -567,7 +568,7 @@ func (h *AttendanceHandler) CheckOut(c *gin.Context) {
 	userID := c.GetString("user_id")
 
 	var req service.CheckOutRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBind(&req); err != nil {
 		utils.ValidationErrorResponse(c, err)
 		return
 	}
@@ -611,4 +612,3 @@ func (h *AttendanceHandler) GetWorkAttendanceRecords(c *gin.Context) {
 
 	utils.PaginatedResponse(c, records, page, perPage, total)
 }
-

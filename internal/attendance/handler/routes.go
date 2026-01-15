@@ -31,9 +31,6 @@ func SetupRoutes(router *gin.Engine, handler *AttendanceHandler, jwtToken *jwt.J
 		v1.POST("/manual", middleware.RoleMiddleware("dosen", "staff"), handler.CreateManualAttendance)
 		v1.PUT("/:id", middleware.RoleMiddleware("dosen", "staff"), handler.UpdateAttendance)
 
-		// Campus attendance (tap in/out)
-		v1.POST("/tap-in", handler.TapIn)
-		v1.POST("/tap-out", handler.TapOut)
 	}
 
 	// Schedule routes
@@ -75,14 +72,5 @@ func SetupRoutes(router *gin.Engine, handler *AttendanceHandler, jwtToken *jwt.J
 			userShifts.GET("/:userId", handler.GetUserShifts)
 			userShifts.POST("", handler.CreateUserShift)
 		}
-
-		// Work schedules (admin only)
-		workSchedules := workAttendance.Group("/schedules")
-		workSchedules.Use(middleware.RoleMiddleware("dosen", "staff"))
-		{
-			workSchedules.GET("", handler.GetWorkSchedules)
-			workSchedules.POST("", handler.CreateWorkSchedule)
-		}
 	}
 }
-

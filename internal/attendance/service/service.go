@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"time"
 
 	"unsri-backend/internal/attendance/repository"
@@ -916,12 +917,17 @@ type CheckInRequest struct {
 	Latitude       *float64 `json:"latitude,omitempty"`
 	Longitude      *float64 `json:"longitude,omitempty"`
 	IsViaUNSRIWiFi *bool    `json:"is_via_unsri_wifi,omitempty"`
+	PhotoID        *string  `json:"photo_id" binding:"required"`
 	Notes          string   `json:"notes,omitempty"`
 }
 
 // CheckIn performs check-in for work attendance
 func (s *AttendanceService) CheckIn(ctx context.Context, userID string, req CheckInRequest) (*models.WorkAttendanceRecord, error) {
-	now := time.Now()
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		loc = time.FixedZone("WIB", 7*60*60)
+	}
+	now := time.Now().In(loc)
 
 	// Check if already checked in today
 	existingRecord, err := s.repo.GetTodayWorkAttendanceRecord(ctx, userID, "CHECK_IN")
@@ -929,7 +935,15 @@ func (s *AttendanceService) CheckIn(ctx context.Context, userID string, req Chec
 		return nil, apperrors.NewConflictError("already checked in today")
 	}
 
-	// Get work schedule if provided
+	// Validate photo presence and existence
+	if req.PhotoID == nil || strings.TrimSpace(*req.PhotoID) == "" {
+		return nil, apperrors.NewValidationError("photo_id is required")
+	}
+	if _, err := s.repo.GetFileByID(ctx, *req.PhotoID); err != nil {
+		return nil, apperrors.NewValidationError("invalid photo_id")
+	}
+
+	// Get work schedule if provided, or use default working hours when not available
 	var schedule *models.WorkSchedule
 	if req.ScheduleID != nil {
 		schedule, err = s.repo.GetWorkScheduleByID(ctx, *req.ScheduleID)
@@ -952,6 +966,11 @@ func (s *AttendanceService) CheckIn(ctx context.Context, userID string, req Chec
 		if now.After(scheduleStartTime.Add(15 * time.Minute)) {
 			status = models.StatusLateIn
 		}
+	} else {
+		defaultStart := time.Date(now.Year(), now.Month(), now.Day(), 8, 0, 0, 0, now.Location())
+		if now.After(defaultStart.Add(15 * time.Minute)) {
+			status = models.StatusLateIn
+		}
 	}
 
 	record := &models.WorkAttendanceRecord{
@@ -963,6 +982,7 @@ func (s *AttendanceService) CheckIn(ctx context.Context, userID string, req Chec
 		IsViaUNSRIWiFi: req.IsViaUNSRIWiFi,
 		Latitude:       req.Latitude,
 		Longitude:      req.Longitude,
+		PhotoID:        req.PhotoID,
 		Notes:          req.Notes,
 	}
 
@@ -979,17 +999,30 @@ type CheckOutRequest struct {
 	Latitude       *float64 `json:"latitude,omitempty"`
 	Longitude      *float64 `json:"longitude,omitempty"`
 	IsViaUNSRIWiFi *bool    `json:"is_via_unsri_wifi,omitempty"`
+	PhotoID        *string  `json:"photo_id" binding:"required"`
 	Notes          string   `json:"notes,omitempty"`
 }
 
 // CheckOut performs check-out for work attendance
 func (s *AttendanceService) CheckOut(ctx context.Context, userID string, req CheckOutRequest) (*models.WorkAttendanceRecord, error) {
-	now := time.Now()
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		loc = time.FixedZone("WIB", 7*60*60)
+	}
+	now := time.Now().In(loc)
 
 	// Check if checked in today
 	checkInRecord, err := s.repo.GetTodayWorkAttendanceRecord(ctx, userID, "CHECK_IN")
 	if err != nil || checkInRecord == nil {
 		return nil, apperrors.NewValidationError("must check in first before check out")
+	}
+
+	// Validate photo presence and existence
+	if req.PhotoID == nil || strings.TrimSpace(*req.PhotoID) == "" {
+		return nil, apperrors.NewValidationError("photo_id is required")
+	}
+	if _, err := s.repo.GetFileByID(ctx, *req.PhotoID); err != nil {
+		return nil, apperrors.NewValidationError("invalid photo_id")
 	}
 
 	// Check if already checked out today
@@ -1022,6 +1055,11 @@ func (s *AttendanceService) CheckOut(ctx context.Context, userID string, req Che
 		if now.Before(scheduleEndTime.Add(-15 * time.Minute)) {
 			status = models.StatusEarlyOut
 		}
+	} else {
+		defaultEnd := time.Date(now.Year(), now.Month(), now.Day(), 16, 0, 0, 0, now.Location())
+		if now.Before(defaultEnd.Add(-15 * time.Minute)) {
+			status = models.StatusEarlyOut
+		}
 	}
 
 	record := &models.WorkAttendanceRecord{
@@ -1033,6 +1071,7 @@ func (s *AttendanceService) CheckOut(ctx context.Context, userID string, req Che
 		IsViaUNSRIWiFi: req.IsViaUNSRIWiFi,
 		Latitude:       req.Latitude,
 		Longitude:      req.Longitude,
+		PhotoID:        req.PhotoID,
 		Notes:          req.Notes,
 	}
 

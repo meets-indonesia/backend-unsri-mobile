@@ -20,7 +20,7 @@ type UserAccessQR struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 
 	// Relations
-	User User `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	User User `gorm:"foreignKey:UserID" json:"-"`
 }
 
 // TableName specifies the table name

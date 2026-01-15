@@ -651,3 +651,14 @@ func (r *AttendanceRepository) UpdateWorkAttendanceRecord(ctx context.Context, r
 	return r.db.WithContext(ctx).Save(record).Error
 }
 
+// GetFileByID gets a file by ID
+func (r *AttendanceRepository) GetFileByID(ctx context.Context, id string) (*models.File, error) {
+	var file models.File
+	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&file).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("file not found")
+		}
+		return nil, err
+	}
+	return &file, nil
+}
