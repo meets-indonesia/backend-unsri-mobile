@@ -660,20 +660,20 @@
               "script": {
                 "exec": [
                   "pm.test(\"Status code is 200 or 201\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
                   "});",
                   "",
                   "pm.test(\"Response has success field\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property('success');",
+                    "    var jsonData = pm.response.json();",
+                    "    pm.expect(jsonData).to.have.property('success');",
                   "});",
                   "",
                   "// Check if location validation failed",
                   "if (pm.response.code === 400) {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.test(\"Error message indicates location issue\", function () {",
-                  "        pm.expect(jsonData.error.message).to.include('location');",
-                  "    });",
+                    "    var jsonData = pm.response.json();",
+                    "    pm.test(\"Error message indicates location issue\", function () {",
+                    "        pm.expect(jsonData.error.message).to.include('location not within allowed area');",
+                    "    });",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -697,9 +697,9 @@
               "raw": "{\n  \"latitude\": -2.9916,\n  \"longitude\": 104.7565\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/attendance/tap-in",
+              "raw": "{{base_url}}/api/v1/location/tap-in",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "attendance", "tap-in"]
+              "path": ["api", "v1", "location", "tap-in"]
             },
             "description": "Tap in to campus (requires location within geofence)"
           }
@@ -869,9 +869,9 @@
               "raw": "{\n  \"latitude\": -2.9916,\n  \"longitude\": 104.7565\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/attendance/tap-out",
+              "raw": "{{base_url}}/api/v1/location/tap-out",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "attendance", "tap-out"]
+              "path": ["api", "v1", "location", "tap-out"]
             }
           }
         },
@@ -2161,5 +2161,4 @@
     }
   ]
 }
-
 

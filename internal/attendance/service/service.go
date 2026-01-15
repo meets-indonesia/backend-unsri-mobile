@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"unsri-backend/internal/attendance/repository"
+	locationrepository "unsri-backend/internal/location/repository"
 	apperrors "unsri-backend/internal/shared/errors"
 	"unsri-backend/internal/shared/models"
 	"unsri-backend/pkg/jwt"
@@ -15,15 +16,17 @@ import (
 
 // AttendanceService handles attendance business logic
 type AttendanceService struct {
-	repo *repository.AttendanceRepository
-	jwt  *jwt.JWT
+	repo         *repository.AttendanceRepository
+	locationRepo *locationrepository.LocationRepository
+	jwt          *jwt.JWT
 }
 
 // NewAttendanceService creates a new attendance service
-func NewAttendanceService(repo *repository.AttendanceRepository, jwtToken *jwt.JWT) *AttendanceService {
+func NewAttendanceService(repo *repository.AttendanceRepository, locationRepo *locationrepository.LocationRepository, jwtToken *jwt.JWT) *AttendanceService {
 	return &AttendanceService{
-		repo: repo,
-		jwt:  jwtToken,
+		repo:         repo,
+		locationRepo: locationRepo,
+		jwt:          jwtToken,
 	}
 }
 
@@ -943,6 +946,15 @@ func (s *AttendanceService) CheckIn(ctx context.Context, userID string, req Chec
 		return nil, apperrors.NewValidationError("invalid photo_id")
 	}
 
+	if req.Latitude == nil || req.Longitude == nil {
+		return nil, apperrors.NewValidationError("latitude and longitude are required")
+	}
+
+	geofence, geoErr := s.locationRepo.CheckLocationInGeofence(ctx, *req.Latitude, *req.Longitude)
+	if geoErr != nil {
+		return nil, apperrors.NewBadRequestError("location not within allowed area")
+	}
+
 	// Get work schedule if provided, or use default working hours when not available
 	var schedule *models.WorkSchedule
 	if req.ScheduleID != nil {
@@ -982,6 +994,7 @@ func (s *AttendanceService) CheckIn(ctx context.Context, userID string, req Chec
 		IsViaUNSRIWiFi: req.IsViaUNSRIWiFi,
 		Latitude:       req.Latitude,
 		Longitude:      req.Longitude,
+		GeofenceID:     &geofence.ID,
 		PhotoID:        req.PhotoID,
 		Notes:          req.Notes,
 	}
@@ -1023,6 +1036,15 @@ func (s *AttendanceService) CheckOut(ctx context.Context, userID string, req Che
 	}
 	if _, err := s.repo.GetFileByID(ctx, *req.PhotoID); err != nil {
 		return nil, apperrors.NewValidationError("invalid photo_id")
+	}
+
+	if req.Latitude == nil || req.Longitude == nil {
+		return nil, apperrors.NewValidationError("latitude and longitude are required")
+	}
+
+	geofence, geoErr := s.locationRepo.CheckLocationInGeofence(ctx, *req.Latitude, *req.Longitude)
+	if geoErr != nil {
+		return nil, apperrors.NewBadRequestError("location not within allowed area")
 	}
 
 	// Check if already checked out today
@@ -1071,6 +1093,7 @@ func (s *AttendanceService) CheckOut(ctx context.Context, userID string, req Che
 		IsViaUNSRIWiFi: req.IsViaUNSRIWiFi,
 		Latitude:       req.Latitude,
 		Longitude:      req.Longitude,
+		GeofenceID:     &geofence.ID,
 		PhotoID:        req.PhotoID,
 		Notes:          req.Notes,
 	}

@@ -852,14 +852,14 @@
                 "value": "application/json"
               }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"latitude\": -2.9914,\n  \"longitude\": 104.7565,\n  \"is_via_wifi\": true,\n  \"notes\": \"Check in from office\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/work-attendance/check-in",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "work-attendance", "check-in"]
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"latitude\": -2.9914,\n  \"longitude\": 104.7565,\n  \"is_via_unsri_wifi\": true,\n  \"photo_id\": \"<file_id>\",\n  \"notes\": \"Check in from office\"\n}"
+          },
+          "url": {
+            "raw": "{{base_url}}/api/v1/work-attendance/check-in",
+            "host": ["{{base_url}}"],
+            "path": ["api", "v1", "work-attendance", "check-in"]
             }
           }
         },
@@ -877,14 +877,14 @@
                 "value": "application/json"
               }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"latitude\": -2.9914,\n  \"longitude\": 104.7565,\n  \"is_via_wifi\": true,\n  \"notes\": \"Check out from office\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/work-attendance/check-out",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "work-attendance", "check-out"]
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"latitude\": -2.9914,\n  \"longitude\": 104.7565,\n  \"is_via_unsri_wifi\": true,\n  \"photo_id\": \"<file_id>\",\n  \"notes\": \"Check out from office\"\n}"
+          },
+          "url": {
+            "raw": "{{base_url}}/api/v1/work-attendance/check-out",
+            "host": ["{{base_url}}"],
+            "path": ["api", "v1", "work-attendance", "check-out"]
             }
           }
         },

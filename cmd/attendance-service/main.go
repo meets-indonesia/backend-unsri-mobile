@@ -8,15 +8,17 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"unsri-backend/internal/attendance/config"
 	"unsri-backend/internal/attendance/handler"
 	"unsri-backend/internal/attendance/repository"
 	"unsri-backend/internal/attendance/service"
+	locationrepository "unsri-backend/internal/location/repository"
 	"unsri-backend/internal/shared/database"
 	"unsri-backend/internal/shared/logger"
 	"unsri-backend/internal/shared/models"
 	"unsri-backend/pkg/jwt"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -61,15 +63,16 @@ func main() {
 	// Initialize JWT
 	jwtToken := jwt.NewJWT(
 		cfg.JWT.SecretKey,
-		15*time.Minute,  // Access token TTL
-		7*24*time.Hour,  // Refresh token TTL
+		15*time.Minute, // Access token TTL
+		7*24*time.Hour, // Refresh token TTL
 	)
 
 	// Initialize repository
 	attendanceRepo := repository.NewAttendanceRepository(db)
+	locationRepo := locationrepository.NewLocationRepository(db)
 
 	// Initialize service
-	attendanceService := service.NewAttendanceService(attendanceRepo, jwtToken)
+	attendanceService := service.NewAttendanceService(attendanceRepo, locationRepo, jwtToken)
 
 	// Initialize handler
 	attendanceHandler := handler.NewAttendanceHandler(attendanceService, log)
@@ -110,4 +113,3 @@ func main() {
 
 	log.Info("Server exited")
 }
-

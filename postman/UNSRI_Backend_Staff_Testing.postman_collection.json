@@ -862,6 +862,64 @@
       "name": "6. Work Attendance (HRIS) - Staff Only",
       "item": [
         {
+          "name": "Upload Selfie Photo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has file data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "});",
+                  "",
+                  "// Save photo ID for check-in/out",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"test_selfie_photo_id\", jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                },
+                {
+                  "key": "folder",
+                  "type": "text",
+                  "value": "selfies"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/files/upload",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "files", "upload"]
+            },
+            "description": "Upload selfie photo untuk keperluan work check-in/checkout. Pilih file gambar saat menjalankan request ini."
+          }
+        },
+        {
           "name": "Check In",
           "event": [
             {
@@ -895,13 +953,58 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"latitude\": -2.9916,\n  \"longitude\": 104.7565\n}"
+              "raw": "{\n  \"latitude\": -2.9916,\n  \"longitude\": 104.7565,\n  \"photo_id\": \"{{test_selfie_photo_id}}\",\n  \"notes\": \"Selfie di gerbang\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/work-attendance/check-in",
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "work-attendance", "check-in"]
+            },
+            "description": "Work check-in (HRIS). Wajib berada dalam geofence aktif dan menyertakan latitude, longitude, serta photo_id."
+          }
+        },
+        {
+          "name": "Check Out",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 atau 201\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response memiliki success field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
             }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": -2.9916,\n  \"longitude\": 104.7565,\n  \"photo_id\": \"{{test_selfie_photo_id}}\",\n  \"notes\": \"Checkout di lobby\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/work-attendance/check-out",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "work-attendance", "check-out"]
+            },
+            "description": "Work check-out (HRIS). Wajib berada dalam geofence aktif dan menyertakan latitude, longitude, serta photo_id."
           }
         },
         {
@@ -2392,5 +2495,4 @@
     }
   ]
 }
-
 
