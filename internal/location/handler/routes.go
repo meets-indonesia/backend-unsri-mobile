@@ -22,6 +22,9 @@ func SetupRoutes(router *gin.Engine, handler *LocationHandler, jwtToken *jwt.JWT
 		v1.GET("/geofences", handler.GetGeofences)
 		v1.POST("/validate", handler.ValidateLocation)
 		v1.POST("/geofences", middleware.RoleMiddleware("staff"), handler.CreateGeofence)
+		v1.GET("/geofences/:id", handler.GetGeofenceByID)
+		v1.PUT("/geofences/:id", middleware.RoleMiddleware("staff"), handler.UpdateGeofence)
+		v1.DELETE("/geofences/:id", middleware.RoleMiddleware("staff"), handler.DeleteGeofence)
 	}
 }
 

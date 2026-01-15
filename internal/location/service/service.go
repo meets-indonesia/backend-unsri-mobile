@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 
+	"unsri-backend/internal/location/repository"
 	apperrors "unsri-backend/internal/shared/errors"
 	"unsri-backend/internal/shared/models"
-	"unsri-backend/internal/location/repository"
 )
 
 // LocationService handles location business logic
@@ -136,6 +136,73 @@ func (s *LocationService) ValidateLocation(ctx context.Context, req ValidateLoca
 	return geofence, nil
 }
 
+// GetGeofenceByID gets a geofence by ID
+func (s *LocationService) GetGeofenceByID(ctx context.Context, id string) (*models.Geofence, error) {
+	geofence, err := s.repo.GetGeofenceByID(ctx, id)
+	if err != nil {
+		return nil, apperrors.NewNotFoundError("geofence", id)
+	}
+	return geofence, nil
+}
+
+// UpdateGeofenceRequest represents update geofence request
+type UpdateGeofenceRequest struct {
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Latitude    *float64 `json:"latitude"`
+	Longitude   *float64 `json:"longitude"`
+	Radius      *float64 `json:"radius"`
+	IsActive    *bool    `json:"is_active"`
+}
+
+// UpdateGeofence updates a geofence
+func (s *LocationService) UpdateGeofence(ctx context.Context, id string, req UpdateGeofenceRequest) (*models.Geofence, error) {
+	geofence, err := s.repo.GetGeofenceByID(ctx, id)
+	if err != nil {
+		return nil, apperrors.NewNotFoundError("geofence", id)
+	}
+
+	if req.Name != "" {
+		geofence.Name = req.Name
+	}
+	if req.Description != "" {
+		geofence.Description = req.Description
+	}
+	if req.Latitude != nil {
+		geofence.Latitude = *req.Latitude
+	}
+	if req.Longitude != nil {
+		geofence.Longitude = *req.Longitude
+	}
+	if req.Radius != nil {
+		geofence.Radius = *req.Radius
+	}
+	if req.IsActive != nil {
+		geofence.IsActive = *req.IsActive
+	}
+
+	if err := s.repo.UpdateGeofence(ctx, geofence); err != nil {
+		return nil, apperrors.NewInternalError("failed to update geofence", err)
+	}
+
+	return geofence, nil
+}
+
+// DeleteGeofence deletes a geofence
+func (s *LocationService) DeleteGeofence(ctx context.Context, id string) error {
+	// Check if exists
+	_, err := s.repo.GetGeofenceByID(ctx, id)
+	if err != nil {
+		return apperrors.NewNotFoundError("geofence", id)
+	}
+
+	if err := s.repo.DeleteGeofence(ctx, id); err != nil {
+		return apperrors.NewInternalError("failed to delete geofence", err)
+	}
+
+	return nil
+}
+
 // CreateGeofenceRequest represents create geofence request
 type CreateGeofenceRequest struct {
 	Name        string  `json:"name" binding:"required"`
@@ -162,4 +229,3 @@ func (s *LocationService) CreateGeofence(ctx context.Context, req CreateGeofence
 
 	return geofence, nil
 }
-

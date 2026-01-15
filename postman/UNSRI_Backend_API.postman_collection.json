@@ -1653,6 +1653,117 @@
               "path": ["api", "v1", "location", "tap-out"]
             }
           }
+        },
+        {
+          "name": "Get Check-In Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/location/check-in-status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "location", "check-in-status"]
+            }
+          }
+        },
+        {
+          "name": "Get Location History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/location/history?page=1&per_page=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "location", "history"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Geofences",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/location/geofences",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "location", "geofences"]
+            }
+          }
+        },
+        {
+          "name": "Create Geofence",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Kampus UNSRI Inderalaya\",\n  \"description\": \"Area kampus utama untuk kehadiran\",\n  \"latitude\": -2.9914,\n  \"longitude\": 104.7565,\n  \"radius\": 150\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/location/geofences",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "location", "geofences"]
+            }
+          }
+        },
+        {
+          "name": "Validate Location In Geofence",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": -2.9914,\n  \"longitude\": 104.7565\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/location/validate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "location", "validate"]
+            }
+          }
         }
       ]
     },

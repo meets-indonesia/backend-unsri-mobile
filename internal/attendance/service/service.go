@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
@@ -411,6 +412,14 @@ func (s *AttendanceService) TapIn(ctx context.Context, userID string, req TapInR
 
 	if current != nil {
 		return nil, apperrors.NewConflictError("already tapped in today")
+	}
+
+	if req.Latitude == nil || req.Longitude == nil {
+		return nil, apperrors.NewValidationError("latitude and longitude are required")
+	}
+
+	if _, err := s.locationRepo.CheckLocationInGeofence(ctx, *req.Latitude, *req.Longitude); err != nil {
+		return nil, apperrors.NewBadRequestError("location not within allowed area")
 	}
 
 	now := time.Now()
@@ -950,10 +959,15 @@ func (s *AttendanceService) CheckIn(ctx context.Context, userID string, req Chec
 		return nil, apperrors.NewValidationError("latitude and longitude are required")
 	}
 
+	fmt.Printf("[CheckIn] Validating location: Lat=%f, Long=%f\n", *req.Latitude, *req.Longitude)
+
 	geofence, geoErr := s.locationRepo.CheckLocationInGeofence(ctx, *req.Latitude, *req.Longitude)
 	if geoErr != nil {
+		fmt.Printf("[CheckIn] Geofence validation failed: %v\n", geoErr)
 		return nil, apperrors.NewBadRequestError("location not within allowed area")
 	}
+
+	fmt.Printf("[CheckIn] Geofence validation passed: ID=%s\n", geofence.ID)
 
 	// Get work schedule if provided, or use default working hours when not available
 	var schedule *models.WorkSchedule

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 	"time"
 
@@ -134,6 +135,8 @@ func (r *LocationRepository) CheckLocationInGeofence(ctx context.Context, latitu
 		return nil, err
 	}
 
+	fmt.Printf("[CheckLocationInGeofence] Checking %d active geofences for location (%f, %f)\n", len(geofences), latitude, longitude)
+
 	// Check if location is within any active geofence
 	for _, geofence := range geofences {
 		// Calculate distance using Haversine formula (in meters)
@@ -143,6 +146,9 @@ func (r *LocationRepository) CheckLocationInGeofence(ctx context.Context, latitu
 			latitude,
 			longitude,
 		)
+
+		fmt.Printf("[CheckLocationInGeofence] ID=%s, Lat=%f, Long=%f, Radius=%f, Distance=%f\n",
+			geofence.ID, geofence.Latitude, geofence.Longitude, geofence.Radius, distance)
 
 		// Check if distance is within radius (radius is in meters)
 		if distance <= geofence.Radius {

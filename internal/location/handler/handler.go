@@ -147,3 +147,59 @@ func (h *LocationHandler) CreateGeofence(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusCreated, result)
 }
 
+// GetGeofenceByID handles get geofence by ID request
+func (h *LocationHandler) GetGeofenceByID(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		utils.ValidationErrorResponse(c, nil)
+		return
+	}
+
+	result, err := h.service.GetGeofenceByID(c.Request.Context(), id)
+	if err != nil {
+		utils.ErrorResponse(c, 0, err)
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, result)
+}
+
+// UpdateGeofence handles update geofence request
+func (h *LocationHandler) UpdateGeofence(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		utils.ValidationErrorResponse(c, nil)
+		return
+	}
+
+	var req service.UpdateGeofenceRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ValidationErrorResponse(c, err)
+		return
+	}
+
+	result, err := h.service.UpdateGeofence(c.Request.Context(), id, req)
+	if err != nil {
+		utils.ErrorResponse(c, 0, err)
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, result)
+}
+
+// DeleteGeofence handles delete geofence request
+func (h *LocationHandler) DeleteGeofence(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		utils.ValidationErrorResponse(c, nil)
+		return
+	}
+
+	if err := h.service.DeleteGeofence(c.Request.Context(), id); err != nil {
+		utils.ErrorResponse(c, 0, err)
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, gin.H{"message": "Geofence deleted successfully"})
+}
+
